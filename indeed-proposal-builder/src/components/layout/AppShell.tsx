@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   IconBell,
   IconBox,
@@ -11,6 +11,7 @@ import {
 } from '../ui/Icons';
 import { useEffect, useRef, useState } from 'react';
 import { loadSidebarCollapsed, saveSidebarCollapsed } from '../../services/localDraftRepository';
+import { draftCollectionRepository } from '../../services/draftCollectionRepository';
 import { metaDate, useBuilder, validityLabel } from '../../app/BuilderProvider';
 
 const SOON = 'Раздел появится позже';
@@ -75,7 +76,7 @@ function ShellLayout({
               <span>Конструктор</span>
             </span>
           ) : (
-            <NavLink to="/" icon={<IconFile />} label="Конструктор" active={false} />
+            <ConstructorNavItem />
           )}
           <NavLink to="/articles" icon={<IconDatabase />} label="Артикулы" active={activeNav === 'articles'} />
           <SoonItem icon={<IconFiles />} label="Мои КП" />
@@ -127,6 +128,40 @@ function ShellLayout({
         {children}
       </div>
     </div>
+  );
+}
+
+function ConstructorNavItem() {
+  const navigate = useNavigate();
+  const [pending, setPending] = useState(false);
+
+  const openConstructor = async () => {
+    if (pending) return;
+    setPending(true);
+    try {
+      await draftCollectionRepository.migrateLegacyIfNeeded();
+      const list = await draftCollectionRepository.list();
+      if (list[0]) {
+        navigate(`/proposals/${list[0].id}/edit`);
+        return;
+      }
+      const draft = await draftCollectionRepository.create();
+      navigate(`/proposals/${draft.id}/edit`);
+    } finally {
+      setPending(false);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      className="nav-item"
+      disabled={pending}
+      onClick={() => void openConstructor()}
+    >
+      <IconFile />
+      <span>Конструктор</span>
+    </button>
   );
 }
 

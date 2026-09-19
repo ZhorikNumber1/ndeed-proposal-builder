@@ -48,13 +48,21 @@ export function HomePage() {
   const lastDraft = drafts[0] ?? null;
 
   const createDraft = async () => {
-    const draft = await draftCollectionRepository.create();
-    navigate(`/proposals/${draft.id}/edit`);
+    try {
+      const draft = await draftCollectionRepository.create();
+      navigate(`/proposals/${draft.id}/edit`);
+    } catch {
+      setToast('Не удалось создать черновик');
+    }
   };
 
   const openExample = async () => {
-    const draft = await draftCollectionRepository.create(createDemoProposal(), 'Демо-пример', 2);
-    navigate(`/proposals/${draft.id}/edit`);
+    try {
+      const draft = await draftCollectionRepository.create(createDemoProposal(), 'Демо-пример', 2);
+      navigate(`/proposals/${draft.id}/edit`);
+    } catch {
+      setToast('Не удалось открыть пример');
+    }
   };
 
   const openDraft = (id: string) => {

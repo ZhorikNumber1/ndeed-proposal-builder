@@ -42,6 +42,7 @@ export function ArticlesPage() {
   const [searchParams] = useSearchParams();
   const [catalog, setCatalog] = useState<ArticlesCatalogFile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [productFilter, setProductFilter] = useState('all');
   const [kindFilter, setKindFilter] = useState('all');
@@ -52,10 +53,22 @@ export function ArticlesPage() {
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
-    void loadCatalog().then((c) => {
-      setCatalog(c);
-      setLoading(false);
-    });
+    let cancelled = false;
+    void loadCatalog()
+      .then((c) => {
+        if (cancelled) return;
+        setCatalog(c);
+        setLoadError(null);
+        setLoading(false);
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        setLoadError(err instanceof Error ? err.message : 'Не удалось загрузить каталог');
+        setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -128,6 +141,13 @@ export function ArticlesPage() {
 
         {loading ? (
           <p className="page-subtitle">Загрузка каталога…</p>
+        ) : loadError ? (
+          <div className="page-card">
+            <div className="empty-state">
+              <strong>Ошибка загрузки каталога</strong>
+              <p>{loadError}</p>
+            </div>
+          </div>
         ) : isEmpty ? (
           <div className="page-card">
             <div className="empty-state">
