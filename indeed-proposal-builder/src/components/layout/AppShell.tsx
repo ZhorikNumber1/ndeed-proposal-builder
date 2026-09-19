@@ -1,4 +1,4 @@
-import { useBuilder, metaDate, validityLabel, restoreDraftFromWindow } from '../../app/BuilderProvider';
+import { Link } from 'react-router-dom';
 import {
   IconBell,
   IconBox,
@@ -9,31 +9,79 @@ import {
   IconHome,
   IconTemplate,
 } from '../ui/Icons';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { loadSidebarCollapsed, saveSidebarCollapsed } from '../../services/localDraftRepository';
+import { metaDate, useBuilder, validityLabel } from '../../app/BuilderProvider';
 
 const SOON = 'Раздел появится позже';
 
-export function AppShell({ children }: { children: React.ReactNode }) {
-  const { state, dispatch, blockingIssues } = useBuilder();
-  const collapsed = state.ui.sidebarCollapsed;
+export type AppNav = 'home' | 'builder' | 'articles';
 
+interface AppShellProps {
+  children: React.ReactNode;
+  title: string;
+  activeNav: AppNav;
+  builderMode?: boolean;
+}
+
+export function AppShell({ children, title, activeNav, builderMode = false }: AppShellProps) {
+  const [collapsed, setCollapsed] = useState(() => loadSidebarCollapsed());
+
+  useEffect(() => {
+    saveSidebarCollapsed(collapsed);
+  }, [collapsed]);
+
+  if (builderMode) {
+    return (
+      <BuilderAppShellInner collapsed={collapsed} setCollapsed={setCollapsed} title={title} activeNav={activeNav}>
+        {children}
+      </BuilderAppShellInner>
+    );
+  }
+
+  return (
+    <ShellLayout collapsed={collapsed} setCollapsed={setCollapsed} title={title} activeNav={activeNav}>
+      {children}
+    </ShellLayout>
+  );
+}
+
+function ShellLayout({
+  children,
+  collapsed,
+  setCollapsed,
+  title,
+  activeNav,
+  topActions,
+}: {
+  children: React.ReactNode;
+  collapsed: boolean;
+  setCollapsed: (v: boolean) => void;
+  title: string;
+  activeNav: AppNav;
+  topActions?: React.ReactNode;
+}) {
   return (
     <div className={`app-shell ${collapsed ? 'sidebar-collapsed' : 'drawer-open'}`}>
       <aside className="sidebar" aria-label="Навигация">
-        <div className="brand" aria-label="Индид">
+        <Link to="/" className="brand" aria-label="Индид">
           Индид
-        </div>
+        </Link>
         <nav className="nav">
-          <SoonItem icon={<IconHome />} label="Главная" />
-          <button type="button" className="nav-item active" aria-current="page">
-            <IconFile />
-            <span>Конструктор КП</span>
-          </button>
-          <SoonItem icon={<IconFile />} label="Мои КП" />
+          <NavLink to="/" icon={<IconHome />} label="Главная" active={activeNav === 'home'} />
+          {activeNav === 'builder' ? (
+            <span className="nav-item active" aria-current="page">
+              <IconFile />
+              <span>Конструктор</span>
+            </span>
+          ) : (
+            <NavLink to="/" icon={<IconFile />} label="Конструктор" active={false} />
+          )}
+          <NavLink to="/articles" icon={<IconDatabase />} label="Артикулы" active={activeNav === 'articles'} />
+          <SoonItem icon={<IconFiles />} label="Мои КП" />
           <SoonItem icon={<IconFiles />} label="Все КП" />
           <SoonItem icon={<IconBox />} label="Продукты" />
           <SoonItem icon={<IconTemplate />} label="Шаблоны КП" />
-          <SoonItem icon={<IconDatabase />} label="Справочники" />
         </nav>
         <button
           type="button"
@@ -41,7 +89,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           aria-expanded={!collapsed}
           aria-label={collapsed ? 'Развернуть меню' : 'Свернуть меню'}
           title={collapsed ? 'Развернуть меню' : 'Свернуть меню'}
-          onClick={() => dispatch({ type: 'SET_SIDEBAR', collapsed: !collapsed })}
+          onClick={() => setCollapsed(!collapsed)}
         >
           <span className="circle" aria-hidden>
             ‹
@@ -56,49 +104,115 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               className="mobile-menu-btn"
-              onClick={() => dispatch({ type: 'SET_SIDEBAR', collapsed: false })}
+              onClick={() => setCollapsed(false)}
             >
               Меню
             </button>
-            <div className="title">Конструктор КП</div>
+            <div className="title">{title}</div>
           </div>
-          <div className="top-actions">
-            <button
-              type="button"
-              className="icon-btn"
-              aria-label={`Замечания к КП: ${blockingIssues.length}`}
-              onClick={() => dispatch({ type: 'SET_SHOW_ISSUES', show: true })}
-            >
-              <IconBell />
-              {blockingIssues.length > 0 ? <span className="badge">{blockingIssues.length}</span> : null}
-            </button>
-            <button
-              type="button"
-              className="icon-btn"
-              aria-label="Справка по вводу"
-              onClick={() => dispatch({ type: 'SET_SHOW_HELP', show: true })}
-            >
-              <IconHelp />
-            </button>
-            <div className="profile" title="Профиль оболочки без авторизации">
-              <div className="avatar" aria-hidden>
-                ИК
-              </div>
-              <div>
-                <div className="profile-name">{state.proposal.manager.displayName || 'Менеджер'}</div>
-                <div className="profile-role">Менеджер</div>
+          {topActions ?? (
+            <div className="top-actions">
+              <div className="profile" title="Профиль оболочки без авторизации">
+                <div className="avatar" aria-hidden>
+                  ИК
+                </div>
+                <div>
+                  <div className="profile-name">Менеджер</div>
+                  <div className="profile-role">Менеджер</div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </header>
         {children}
       </div>
+    </div>
+  );
+}
 
+function NavLink({
+  to,
+  icon,
+  label,
+  active,
+  onClick,
+}: {
+  to: string;
+  icon: React.ReactNode;
+  label: string;
+  active: boolean;
+  onClick?: (e: React.MouseEvent) => void;
+}) {
+  return (
+    <Link
+      to={to}
+      className={`nav-item ${active ? 'active' : ''}`}
+      aria-current={active ? 'page' : undefined}
+      onClick={onClick}
+    >
+      {icon}
+      <span>{label}</span>
+    </Link>
+  );
+}
+
+function BuilderAppShellInner({
+  children,
+  collapsed,
+  setCollapsed,
+  title,
+  activeNav,
+}: {
+  children: React.ReactNode;
+  collapsed: boolean;
+  setCollapsed: (v: boolean) => void;
+  title: string;
+  activeNav: AppNav;
+}) {
+  const { state, dispatch, blockingIssues } = useBuilder();
+
+  return (
+    <ShellLayout
+      collapsed={collapsed}
+      setCollapsed={setCollapsed}
+      title={title}
+      activeNav={activeNav}
+      topActions={
+        <div className="top-actions">
+          <button
+            type="button"
+            className="icon-btn"
+            aria-label={`Замечания к КП: ${blockingIssues.length}`}
+            onClick={() => dispatch({ type: 'SET_SHOW_ISSUES', show: true })}
+          >
+            <IconBell />
+            {blockingIssues.length > 0 ? <span className="badge">{blockingIssues.length}</span> : null}
+          </button>
+          <button
+            type="button"
+            className="icon-btn"
+            aria-label="Справка по вводу"
+            onClick={() => dispatch({ type: 'SET_SHOW_HELP', show: true })}
+          >
+            <IconHelp />
+          </button>
+          <div className="profile" title="Профиль оболочки без авторизации">
+            <div className="avatar" aria-hidden>
+              ИК
+            </div>
+            <div>
+              <div className="profile-name">{state.proposal.manager.displayName || 'Менеджер'}</div>
+              <div className="profile-role">Менеджер</div>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      {children}
       {state.ui.toast ? <div className="toast" role="status">{state.ui.toast}</div> : null}
       {state.ui.showHelp ? <HelpDialog /> : null}
       {state.ui.showIssues ? <IssuesDialog /> : null}
-      {state.ui.draftRestorePrompt ? <DraftRestoreDialog /> : null}
-    </div>
+    </ShellLayout>
   );
 }
 
@@ -170,40 +284,6 @@ function IssuesDialog() {
   );
 }
 
-function DraftRestoreDialog() {
-  const { dispatch } = useBuilder();
-  return (
-    <div className="dialog-backdrop">
-      <div className="dialog" role="dialog" aria-modal="true" aria-labelledby="draft-title">
-        <h2 id="draft-title">Найден сохранённый черновик</h2>
-        <p>Восстановить предыдущую работу или начать с демонстрационного примера?</p>
-        <div className="dialog-actions">
-          <button
-            type="button"
-            className="bottom-btn"
-            onClick={() => {
-              dispatch({ type: 'LOAD_DEMO' });
-              dispatch({ type: 'SET_DRAFT_PROMPT', show: false });
-            }}
-          >
-            Демо-пример
-          </button>
-          <button
-            type="button"
-            className="bottom-btn next"
-            onClick={() => {
-              restoreDraftFromWindow(dispatch);
-              dispatch({ type: 'SET_DRAFT_PROMPT', show: false });
-            }}
-          >
-            Восстановить
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function ProposalMetaCard() {
   const { state, dispatch } = useBuilder();
   const p = state.proposal;
@@ -244,4 +324,3 @@ export function ProposalMetaCard() {
     </div>
   );
 }
-

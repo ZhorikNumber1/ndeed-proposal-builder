@@ -6,6 +6,7 @@ import {
   useMemo,
   useReducer,
   useRef,
+  useState,
   type ReactNode,
 } from 'react';
 import {
@@ -14,7 +15,9 @@ import {
   type BuilderAction,
   type BuilderState,
 } from './builderReducer';
-import { localDraftRepository, loadSidebarCollapsed, saveSidebarCollapsed } from '../services/localDraftRepository';
+import { loadSidebarCollapsed, saveSidebarCollapsed } from '../services/localDraftRepository';
+import { draftCollectionRepository } from '../services/draftCollectionRepository';
+import type { DraftEnvelope } from '../domain/draftTypes';
 import { validateProposal, collectBlockingIssues } from '../domain/validateProposal';
 import { buildProposalDocument, describeStructure } from '../domain/buildProposalDocument';
 import { calculateOptionSync } from '../domain/calculateOption';
@@ -48,11 +51,15 @@ interface BuilderContextValue {
   exportDocx: () => Promise<void>;
   exportPdf: () => Promise<void>;
   formatOptionTotal: (optionId: string) => string;
+  saveStatus: 'saved' | 'saving' | 'error';
+  draftRevision: number;
 }
 
 const BuilderContext = createContext<BuilderContextValue | null>(null);
 
-export function BuilderProvider({ children }: { children: ReactNode }) {
+const AUTOSAVE_MS = 600;
+
+export function BuilderProvider({ children, draftId }: { children: ReactNode; draftId: string }) {
   const [state, dispatch] = useReducer(builderReducer, undefined, () => {
     const initial = createInitialState();
     initial.ui.sidebarCollapsed = loadSidebarCollapsed();
@@ -60,6 +67,10 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
   });
   const hydratedRef = useRef(false);
   const stateRef = useRef(state);
+  const draftEnvelopeRef = useRef<DraftEnvelope | null>(null);
+  const autosaveTimerRef = useRef<number | null>(null);
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
+  const [draftRevision, setDraftRevision] = useState(1);
 
   useEffect(() => {
     stateRef.current = state;
@@ -68,19 +79,92 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const draft = await localDraftRepository.load();
+      await draftCollectionRepository.migrateLegacyIfNeeded();
+      const draft = await draftCollectionRepository.get(draftId);
       if (cancelled || hydratedRef.current) return;
       hydratedRef.current = true;
-      if (draft) {
-        dispatch({ type: 'SET_DRAFT_PROMPT', show: true });
-        // stash draft on window for restore action via custom event pattern — keep in ref
-        (window as unknown as { __indeedDraft?: typeof draft }).__indeedDraft = draft;
-      }
+      if (!draft) return;
+      draftEnvelopeRef.current = draft;
+      setDraftRevision(draft.revision);
+      setSaveStatus(draft.saveStatus ?? 'saved');
+      dispatch({
+        type: 'HYDRATE',
+        proposal: draft.proposal,
+        ui: {
+          activeStep: draft.builder.activeStep,
+          activeOptionId: draft.builder.activeOptionId ?? draft.proposal.options[0]?.id ?? '',
+          sidebarCollapsed: loadSidebarCollapsed(),
+        },
+        isDemoExample: draft.title === 'Демо-пример',
+      });
     })();
     return () => {
       cancelled = true;
     };
+  }, [draftId]);
+
+  const persistDraft = useCallback(async (flush = false): Promise<void> => {
+    const envelope = draftEnvelopeRef.current;
+    if (!envelope) return;
+    const snap = stateRef.current;
+    const nextEnvelope: DraftEnvelope = {
+      ...envelope,
+      proposal: snap.proposal,
+      builder: {
+        activeStep: snap.ui.activeStep,
+        activeOptionId: snap.ui.activeOptionId || null,
+      },
+      saveStatus: 'saving',
+    };
+    setSaveStatus('saving');
+    try {
+      const result = await draftCollectionRepository.save(nextEnvelope, envelope.revision);
+      if (!result.ok) {
+        setSaveStatus('error');
+        draftEnvelopeRef.current = result.stored;
+        setDraftRevision(result.stored.revision);
+        dispatch({ type: 'SET_TOAST', message: 'Конфликт версий — черновик обновлён из хранилища' });
+        dispatch({
+          type: 'HYDRATE',
+          proposal: result.stored.proposal,
+          ui: {
+            activeStep: result.stored.builder.activeStep,
+            activeOptionId: result.stored.builder.activeOptionId ?? result.stored.proposal.options[0]?.id ?? '',
+          },
+          isDemoExample: result.stored.title === 'Демо-пример',
+        });
+        return;
+      }
+      draftEnvelopeRef.current = result.draft;
+      setDraftRevision(result.draft.revision);
+      setSaveStatus('saved');
+      dispatch({ type: 'MARK_CLEAN' });
+      if (flush) {
+        dispatch({ type: 'SET_TOAST', message: 'Черновик сохранён' });
+      }
+    } catch (e) {
+      setSaveStatus('error');
+      dispatch({
+        type: 'SET_TOAST',
+        message: e instanceof Error ? e.message : 'Ошибка сохранения',
+      });
+    }
   }, []);
+
+  useEffect(() => {
+    if (!hydratedRef.current || !state.ui.dirty) return;
+    if (autosaveTimerRef.current != null) {
+      window.clearTimeout(autosaveTimerRef.current);
+    }
+    autosaveTimerRef.current = window.setTimeout(() => {
+      void persistDraft(false);
+    }, AUTOSAVE_MS);
+    return () => {
+      if (autosaveTimerRef.current != null) {
+        window.clearTimeout(autosaveTimerRef.current);
+      }
+    };
+  }, [state.proposal, state.ui.activeStep, state.ui.activeOptionId, state.ui.dirty, persistDraft]);
 
   useEffect(() => {
     saveSidebarCollapsed(state.ui.sidebarCollapsed);
@@ -99,27 +183,12 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
   const activeOption = state.proposal.options.find((o) => o.id === state.ui.activeOptionId) ?? state.proposal.options[0];
 
   const saveDraft = useCallback(async () => {
-    try {
-      const snap = stateRef.current;
-      await localDraftRepository.save({
-        schemaVersion: 1,
-        savedAt: new Date().toISOString(),
-        proposal: snap.proposal,
-        ui: {
-          activeStep: snap.ui.activeStep,
-          activeOptionId: snap.ui.activeOptionId,
-          sidebarCollapsed: snap.ui.sidebarCollapsed,
-        },
-      });
-      dispatch({ type: 'MARK_CLEAN' });
-      dispatch({ type: 'SET_TOAST', message: 'Черновик сохранён' });
-    } catch (e) {
-      dispatch({
-        type: 'SET_TOAST',
-        message: e instanceof Error ? e.message : 'Ошибка сохранения',
-      });
+    if (autosaveTimerRef.current != null) {
+      window.clearTimeout(autosaveTimerRef.current);
+      autosaveTimerRef.current = null;
     }
-  }, []);
+    await persistDraft(true);
+  }, [persistDraft]);
 
   const exportDocx = useCallback(async () => {
     dispatch({ type: 'SET_EXPORT_PENDING', kind: 'docx' });
@@ -185,6 +254,8 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
     exportDocx,
     exportPdf,
     formatOptionTotal,
+    saveStatus,
+    draftRevision,
   };
 
   return <BuilderContext.Provider value={value}>{children}</BuilderContext.Provider>;
@@ -205,20 +276,4 @@ export function validityLabel(proposal: BuilderState['proposal']): string {
 
 export function metaDate(proposal: BuilderState['proposal']): string {
   return formatDateRu(proposal.issueDate);
-}
-
-export function restoreDraftFromWindow(dispatch: React.Dispatch<BuilderAction>) {
-  const draft = (window as unknown as { __indeedDraft?: { proposal: BuilderState['proposal']; ui: BuilderState['ui'] } }).__indeedDraft;
-  if (!draft) return;
-  dispatch({
-    type: 'HYDRATE',
-    proposal: draft.proposal,
-    ui: {
-      activeStep: draft.ui.activeStep,
-      activeOptionId: draft.ui.activeOptionId,
-      sidebarCollapsed: draft.ui.sidebarCollapsed,
-    },
-    isDemoExample: false,
-  });
-  dispatch({ type: 'SET_TOAST', message: 'Черновик восстановлен' });
 }

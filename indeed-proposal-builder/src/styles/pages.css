@@ -1,0 +1,262 @@
+.page-content {
+  padding: 24px 28px 40px;
+  max-width: 1120px;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0 0 8px;
+}
+
+.page-subtitle {
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.page-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px 22px;
+  margin-bottom: 16px;
+}
+
+.page-card h2 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.page-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid var(--line-dark);
+  background: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  color: inherit;
+}
+
+.page-btn.primary {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+
+.page-btn.primary:hover {
+  background: var(--red-dark);
+}
+
+.page-btn.ghost {
+  background: var(--bg);
+}
+
+.page-btn.small {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.page-note {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+  margin-top: 20px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border-radius: 8px;
+  border: 1px dashed var(--line-dark);
+}
+
+.drafts-toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.drafts-search {
+  flex: 1;
+  min-width: 200px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line-dark);
+  border-radius: 8px;
+  background: var(--field);
+}
+
+.drafts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.draft-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.draft-row:hover {
+  border-color: var(--line-dark);
+}
+
+.draft-row-main {
+  min-width: 0;
+}
+
+.draft-row-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.draft-row-meta {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.draft-row-totals {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.draft-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--muted);
+}
+
+.empty-state strong {
+  display: block;
+  color: var(--text);
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.articles-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.articles-filters input,
+.articles-filters select {
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--line-dark);
+  border-radius: 8px;
+  background: var(--field);
+}
+
+.articles-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.articles-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.articles-table th,
+.articles-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.articles-table th {
+  background: var(--bg);
+  font-weight: 600;
+}
+
+.articles-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(22, 26, 36, 0.35);
+  z-index: 100;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.drawer-panel {
+  width: min(420px, 100%);
+  background: #fff;
+  height: 100%;
+  padding: 24px;
+  box-shadow: -4px 0 24px rgba(25, 28, 40, 0.12);
+  overflow-y: auto;
+}
+
+.drawer-panel h3 {
+  margin: 0 0 16px;
+}
+
+.drawer-field {
+  margin-bottom: 12px;
+}
+
+.drawer-field label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.drawer-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.builder-not-found {
+  padding: 48px 28px;
+  text-align: center;
+}
+
+.builder-not-found h1 {
+  margin: 0 0 12px;
+}

@@ -1,4 +1,5 @@
 import type { DraftRepository, StoredDraft } from '../domain/types';
+import { draftCollectionRepository } from './draftCollectionRepository';
 
 export const DRAFT_STORAGE_KEY = 'indeed-proposal-builder:draft:v1';
 export const SIDEBAR_STORAGE_KEY = 'indeed-proposal-builder:sidebar-collapsed';
@@ -9,6 +10,7 @@ function isStoredDraft(value: unknown): value is StoredDraft {
   return v.schemaVersion === 1 && v.proposal != null && v.proposal.schemaVersion === 1;
 }
 
+/** @deprecated Use draftCollectionRepository — thin compatibility wrapper for legacy single-draft API. */
 export function createLocalDraftRepository(): DraftRepository {
   return {
     async load(): Promise<StoredDraft | null> {
@@ -45,6 +47,13 @@ export function createLocalDraftRepository(): DraftRepository {
 }
 
 export const localDraftRepository = createLocalDraftRepository();
+
+export async function loadLatestDraftEnvelope() {
+  await draftCollectionRepository.migrateLegacyIfNeeded();
+  const summaries = await draftCollectionRepository.list();
+  if (summaries.length === 0) return null;
+  return draftCollectionRepository.get(summaries[0].id);
+}
 
 export function loadSidebarCollapsed(): boolean {
   try {

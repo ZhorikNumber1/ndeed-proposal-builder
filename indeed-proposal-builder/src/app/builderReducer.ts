@@ -68,13 +68,13 @@ function recalcAll(proposal: Proposal, revision: number): Proposal {
 }
 
 export function createInitialState(): BuilderState {
-  const proposal = createDemoProposal();
+  const proposal = createEmptyProposal();
   return {
     proposal,
-    isDemoExample: true,
+    isDemoExample: false,
     revision: 1,
     ui: {
-      activeStep: 2,
+      activeStep: 1,
       activeOptionId: proposal.options[0]?.id ?? '',
       sidebarCollapsed: false,
       previewExpanded: false,
