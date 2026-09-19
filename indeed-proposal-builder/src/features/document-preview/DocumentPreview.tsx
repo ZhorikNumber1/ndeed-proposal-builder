@@ -237,8 +237,8 @@ export function DocumentPreview({ expanded }: { expanded?: boolean }) {
         <div className="preview-unresolved">
           <strong>Незавершённые данные</strong>
           <ul>
-            {document.unresolvedNotes.map((n) => (
-              <li key={n}>{n}</li>
+            {document.unresolvedNotes.map((n, idx) => (
+              <li key={`note-${idx}`}>{typeof n === 'string' ? n : String((n as { text?: unknown })?.text ?? n)}</li>
             ))}
           </ul>
         </div>

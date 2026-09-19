@@ -46,8 +46,28 @@ test('smoke: home, create draft, edit, parse, save', async ({ page }) => {
   await expect(page.getByText('ООО «Тест»')).toBeVisible();
 });
 
-test('articles page shows missing source honestly', async ({ page }) => {
+test('articles page shows imported catalog', async ({ page }) => {
   await page.goto('/articles');
   await expect(page.getByRole('heading', { name: 'Артикулы' })).toBeVisible();
-  await expect(page.getByText('Справочник ещё не импортирован из Excel')).toBeVisible();
+  await expect(page.getByText(/Статус:\s*ok/)).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText(/Импортировано \d+ записей/)).toBeVisible();
+  const search = page.getByLabel('Поиск артикулов');
+  await search.fill('PAM-01120025');
+  await expect(page.getByText('PAM-01120025', { exact: true }).first()).toBeVisible({ timeout: 15_000 });
+});
+
+test('open example reaches builder without crash', async ({ page }) => {
+  await page.addInitScript(() => {
+    try {
+      localStorage.clear();
+    } catch {
+      /* ignore */
+    }
+  });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Открыть пример' }).click();
+  await expect(page).toHaveURL(/\/proposals\/.+\/edit/);
+  await expect(page.locator('.title')).toHaveText('Конструктор КП');
+  await expect(page.getByText('ООО «Ромашка»')).toBeVisible();
+  await expect(page.locator('.panel-title', { hasText: 'Продукты и конфигурация' })).toBeVisible();
 });

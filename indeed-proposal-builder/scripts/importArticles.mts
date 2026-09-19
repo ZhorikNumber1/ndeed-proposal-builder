@@ -170,9 +170,9 @@ function isSkuCandidate(text: string): boolean {
   if (text.toUpperCase() === 'PF') return false;
   if (!/\d/.test(text)) return false;
   if (text.length < 4) return false;
-  // Reject pure prose
-  if (/\s{2,}/.test(text) && text.length > 40) return false;
-  if (/^Неисключительные|^Сертификат|^продажа/i.test(text)) return false;
+  // Real article codes are compact tokens; reject section headers / prose.
+  if (/\s/.test(text)) return false;
+  if (/^Неисключительные|^Сертификат|^продажа|^основные$/i.test(text)) return false;
   return /[A-Za-zА-Яа-я]/.test(text);
 }
 
