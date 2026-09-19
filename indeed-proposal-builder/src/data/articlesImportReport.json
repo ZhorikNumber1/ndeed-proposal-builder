@@ -1,12 +1,24 @@
 {
-  "status": "missing_source",
-  "message": "Файл Excel со справочником артикулов не найден. Импорт не выполнялся.",
-  "importedAt": null,
-  "rowCount": 0,
-  "fileName": null,
-  "fileHash": null,
+  "status": "ok",
+  "message": "Импортировано 10317 записей (10282 уникальных исходных кодов) из артикулы_09.04.2026 копия.xlsx",
+  "importedAt": "2026-09-19T18:43:02.925Z",
+  "rowCount": 10317,
+  "fileName": "артикулы_09.04.2026 копия.xlsx",
+  "fileHash": "231eb4414fe7290d70e98ce004b855346e6a55750a3890b9ea31ff796682c4bf",
+  "sheetStats": {
+    "АМ ": 1287,
+    "СМ": 153,
+    "PAM": 8819,
+    "ITDR": 14,
+    "Сертификаты на внедрение": 3,
+    "разовыеуникальные артикулы": 41,
+    "Сертификаты на поддержку": 0,
+    "рабочий лист": 0
+  },
   "issues": [
-    "Expected file: reference/артикулы_09.04.2026 копия.xlsx",
-    "Also searched uploads/ and *артикул*.xlsx under workspace"
+    "Sheet «Сертификаты на поддержку»: template only, SKUs not imported",
+    "Sheet «рабочий лист»: examples only, SKUs not imported",
+    "PAM!D722 contains incomplete value «PF» (not imported as SKU)",
+    "ITDR!F12 = 0 ignored (not a SKU/price)"
   ]
 }

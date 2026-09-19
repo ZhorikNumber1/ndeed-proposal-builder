@@ -18,7 +18,7 @@ describe('articleResolver PAM UL25', () => {
     expect(result.status).toBe('found');
     expect(result.sku).toBe('PAM-01120025');
     expect(result.skuStatus).toBe('catalog_confirmed');
-    expect(result.provenance).toBe('control_seed');
+    expect(result.provenance).toBe('catalog');
   });
 
   it('resolves PAM UL25 year FSTEC to PF-01120025', () => {

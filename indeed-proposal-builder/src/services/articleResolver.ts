@@ -53,7 +53,18 @@ function matchesObservedCertification(obs: ObservedSku, certification: boolean |
 }
 
 function matchesCustomerGroup(entry: ArticleEntry, customerGroupId?: CustomerGroupId): boolean {
-  if (customerGroupId == null) return entry.customerGroupId === 'standard';
+  if (customerGroupId == null || customerGroupId === 'standard') {
+    // Default / standard resolution must not pick specialized client columns
+    // that were imported with customerGroupId=standard (Росатом, Россети, …).
+    if (entry.kind === 'customer_variant') return false;
+    return entry.customerGroupId === 'standard';
+  }
+  if (customerGroupId === 'gazprom') {
+    return entry.customerGroupId === 'gazprom';
+  }
+  if (customerGroupId === 'fstec') {
+    return entry.certification === 'fstec' && entry.customerGroupId === 'standard';
+  }
   return entry.customerGroupId === customerGroupId;
 }
 
@@ -147,6 +158,35 @@ function foundFromEntry(entry: ArticleEntry, provenance: 'catalog' | 'control_se
   };
 }
 
+function scoreEntry(entry: ArticleEntry): number {
+  let score = 0;
+  // Prefer primary license packs over warranty / update / review leftovers.
+  if (entry.quality === 'confirmed') score += 10;
+  if (entry.kind !== 'needs_review') score += 5;
+  if (!/гарантия/i.test(entry.groupLabel ?? '')) score += 8;
+  if (!/обновлен/i.test(entry.groupLabel ?? '') && !entry.issues.includes('update_sku')) score += 8;
+  const role = entry.sources[0]?.columnRole;
+  if (role === 'standard' || role === 'standard_fstec') score += 4;
+  return score;
+}
+
+function pickBestEntries(matches: ArticleEntry[]): ArticleEntry[] {
+  if (matches.length <= 1) return matches;
+  let best = -Infinity;
+  const ranked: ArticleEntry[] = [];
+  for (const entry of matches) {
+    const score = scoreEntry(entry);
+    if (score > best) {
+      best = score;
+      ranked.length = 0;
+      ranked.push(entry);
+    } else if (score === best) {
+      ranked.push(entry);
+    }
+  }
+  return ranked;
+}
+
 export function resolveArticle(input: ArticleResolveInput): ArticleResolution {
   if (input.itemId === 'PAM.FSTEC_KIT') {
     return notFound(['FSTEC kit has no standalone SKU']);
@@ -162,7 +202,7 @@ export function resolveArticle(input: ArticleResolveInput): ArticleResolution {
 
   const pool = entryPool();
   const provenance = catalog.importStatus === 'ok' && catalog.entries.length > 0 ? 'catalog' : 'control_seed';
-  const matches = filterEntries(pool, input);
+  const matches = pickBestEntries(filterEntries(pool, input));
 
   if (matches.length === 1) {
     return foundFromEntry(matches[0], provenance);

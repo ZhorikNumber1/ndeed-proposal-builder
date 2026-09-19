@@ -1,3 +1,7 @@
+/**
+ * Dev-only Excel → articlesCatalog.json importer.
+ * Run: npm run import:articles
+ */
 import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
@@ -16,7 +20,6 @@ import type { LicenseType, Metric, ProductCode } from '../src/domain/types.ts';
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const ROOT = resolve(__dirname, '..');
 const WORKSPACE = resolve(ROOT, '..');
-
 const CATALOG_PATH = join(ROOT, 'src/data/articlesCatalog.json');
 const REPORT_PATH = join(ROOT, 'src/data/articlesImportReport.json');
 
@@ -25,59 +28,93 @@ const EXPECTED_SHEETS = [
   'СМ',
   'PAM',
   'ITDR',
-  'Шаблоны',
-  'Сертификаты внедрения',
-  'СВ',
-  'Служебные',
+  'Сертификаты на поддержку',
+  'Сертификаты на внедрение',
+  'разовыеуникальные артикулы',
+  'рабочий лист',
 ] as const;
 
-const TEMPLATE_SHEETS = new Set(['Шаблоны', 'Служебные']);
+/** PAM client column map (0-based): C=2 … T=19 */
+const PAM_COLUMN_MAP: Array<{
+  col: number;
+  role: string;
+  certification: 'ordinary' | 'fstec' | null;
+  customerGroupId: CustomerGroupId | 'unresolved';
+  rawLabel: string;
+}> = [
+  { col: 2, role: 'standard', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'Основные' },
+  { col: 3, role: 'standard_fstec', certification: 'fstec', customerGroupId: 'standard', rawLabel: 'Основные ФСТЭК' },
+  { col: 4, role: 'gazprom', certification: 'ordinary', customerGroupId: 'gazprom', rawLabel: 'Газпром' },
+  { col: 5, role: 'gazprom_fstec', certification: 'fstec', customerGroupId: 'gazprom', rawLabel: 'Газпром ФСТЭК' },
+  { col: 6, role: 'dzo_gpb', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'ДЗО ГПБ' },
+  { col: 7, role: 'dzo_gpb_fstec', certification: 'fstec', customerGroupId: 'standard', rawLabel: 'ДЗО ГПБ ФСТЭК' },
+  { col: 8, role: 'rosatom', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'Росатом' },
+  { col: 9, role: 'rosatom_fstec', certification: 'fstec', customerGroupId: 'standard', rawLabel: 'Росатом ФСТЭК' },
+  { col: 10, role: 'rosneft', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'Роснефть' },
+  { col: 11, role: 'rosneft_fstec', certification: 'fstec', customerGroupId: 'standard', rawLabel: 'Роснефть ФСТЭК' },
+  { col: 12, role: 'rosseti', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'Россети' },
+  { col: 13, role: 'rosseti_fstec', certification: 'fstec', customerGroupId: 'standard', rawLabel: 'Россети ФСТЭК' },
+  { col: 14, role: 'rushydro', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'РусГидро' },
+  { col: 15, role: 'rushydro_fstec', certification: 'fstec', customerGroupId: 'standard', rawLabel: 'РусГидро ФСТЭК' },
+  { col: 16, role: 'depir', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'ДЭПиР' },
+  { col: 17, role: 'depir_fstec', certification: 'fstec', customerGroupId: 'standard', rawLabel: 'ДЭПиР ФСТЭК' },
+  { col: 18, role: 'aviation', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'Авиационная группа' },
+  { col: 19, role: 'aviation_fstec', certification: 'fstec', customerGroupId: 'standard', rawLabel: 'Авиационная группа ФСТЭК' },
+];
 
-const SKU_RE =
-  /^(?:[A-ZА-Я]{1,4}-)?[A-Za-zА-Яа-я]{0,4}-?\d[\dA-Za-zА-Яа-я-]*$/u;
-
-interface ColumnRole {
+const AM_CM_COLUMNS: Array<{
   col: number;
   role: string;
   certification: 'ordinary' | 'fstec' | null;
   customerGroupId: CustomerGroupId;
-}
+  rawLabel: string;
+}> = [
+  { col: 2, role: 'standard', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'Основные' },
+  { col: 3, role: 'gazprom', certification: 'ordinary', customerGroupId: 'gazprom', rawLabel: 'Газпром' },
+  { col: 4, role: 'dzo_gpb', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'ДЗО ГПБ' },
+  { col: 5, role: 'rosatom', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'Росатом' },
+  { col: 6, role: 'rushydro', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'РусГидро' },
+];
 
-interface ParsedRowContext {
-  groupLabel: string | null;
-  name: string | null;
-}
+function findExcel(): string | null {
+  const preferred = join(ROOT, 'reference/артикулы_09.04.2026 копия.xlsx');
+  if (existsSync(preferred)) return preferred;
 
-function findExcelFiles(): string[] {
-  const candidates: string[] = [];
-  const direct = join(ROOT, 'reference/артикулы_09.04.2026 копия.xlsx');
-  if (existsSync(direct)) candidates.push(direct);
-
-  const uploadsDir = join(WORKSPACE, 'uploads');
-  if (existsSync(uploadsDir)) {
-    for (const name of readdirSync(uploadsDir)) {
-      if (/артикул/i.test(name) && /\.xlsx$/i.test(name)) {
-        candidates.push(join(uploadsDir, name));
+  const dirs = [
+    join(WORKSPACE, 'uploads'),
+    join('/home/ubuntu/.cursor/projects/workspace/uploads'),
+    join(ROOT, 'uploads'),
+    join(ROOT, 'reference'),
+  ];
+  for (const dir of dirs) {
+    if (!existsSync(dir)) continue;
+    for (const name of readdirSync(dir)) {
+      if (/\.xlsx$/i.test(name) && (/артикул/i.test(name) || /09\.04\.2026/.test(name) || /______/.test(name))) {
+        return join(dir, name);
       }
     }
   }
 
-  const walk = (dir: string) => {
-    if (!existsSync(dir)) return;
+  const walk = (dir: string, depth = 0): string | null => {
+    if (depth > 4 || !existsSync(dir)) return null;
     for (const name of readdirSync(dir)) {
+      if (name === 'node_modules' || name === '.git' || name === 'dist') continue;
       const full = join(dir, name);
-      const st = statSync(full);
-      if (st.isDirectory()) {
-        if (name === 'node_modules' || name === '.git') continue;
-        walk(full);
-      } else if (/артикул/i.test(name) && /\.xlsx$/i.test(name)) {
-        candidates.push(full);
+      try {
+        const st = statSync(full);
+        if (st.isDirectory()) {
+          const hit = walk(full, depth + 1);
+          if (hit) return hit;
+        } else if (/\.xlsx$/i.test(name) && /артикул|09\.04/i.test(name)) {
+          return full;
+        }
+      } catch {
+        /* ignore */
       }
     }
+    return null;
   };
-  walk(WORKSPACE);
-
-  return [...new Set(candidates)];
+  return walk(WORKSPACE);
 }
 
 function colLetter(col: number): string {
@@ -91,429 +128,464 @@ function colLetter(col: number): string {
   return s;
 }
 
-function cellRef(row: number, col: number): string {
-  return `${colLetter(col)}${row + 1}`;
+function cellAddr(row0: number, col0: number): string {
+  return `${colLetter(col0)}${row0 + 1}`;
 }
 
-function stableId(sheet: string, row: number, col: number, sku: string): string {
-  return `${sheet}|${cellRef(row, col)}|${sku}`;
+function sheetRange(sheet: XLSX.WorkSheet): { r0: number; r1: number; c0: number; c1: number } | null {
+  const ref = sheet['!ref'];
+  if (!ref) return null;
+  const decoded = XLSX.utils.decode_range(ref);
+  return { r0: decoded.s.r, r1: decoded.e.r, c0: decoded.s.c, c1: decoded.e.c };
 }
 
-function normalizeCell(value: unknown): string | null {
+function cellText(sheet: XLSX.WorkSheet, row0: number, col0: number): string | null {
+  const addr = cellAddr(row0, col0);
+  return asText(sheet[addr]?.v);
+}
+
+function fillGroupColumn(sheet: XLSX.WorkSheet, r0: number, r1: number): Map<number, string> {
+  const map = new Map<number, string>();
+  let last: string | null = null;
+  for (let r = r0; r <= r1; r++) {
+    const g = cellText(sheet, r, 0);
+    if (g && !isSkuCandidate(g)) last = g;
+    if (last) map.set(r, last);
+  }
+  return map;
+}
+
+function asText(value: unknown): string | null {
   if (value == null) return null;
-  const text = String(value).trim();
-  if (!text || text === '0' || text === '—' || text === '-') return null;
-  if (text.toUpperCase() === 'PF') return null;
-  return text;
+  if (typeof value === 'number') {
+    if (value === 0) return null;
+    return String(value);
+  }
+  const t = String(value).trim();
+  if (!t || t === '0' || t === '—' || t === '-' || t === '–') return null;
+  return t;
 }
 
-function looksLikeSku(value: string): boolean {
-  if (!SKU_RE.test(value)) return false;
-  if (/^(PF|PAM|AM|CM|ITDR|GAM|Gpam)$/i.test(value)) return false;
-  return /\d/.test(value);
+function isSkuCandidate(text: string): boolean {
+  if (text.toUpperCase() === 'PF') return false;
+  if (!/\d/.test(text)) return false;
+  if (text.length < 4) return false;
+  // Reject pure prose
+  if (/\s{2,}/.test(text) && text.length > 40) return false;
+  if (/^Неисключительные|^Сертификат|^продажа/i.test(text)) return false;
+  return /[A-Za-zА-Яа-я]/.test(text);
 }
 
-function productFromSheet(sheet: string): ProductCode | null {
-  if (sheet.startsWith('АМ')) return 'AM';
-  if (sheet === 'СМ') return 'CM';
-  if (sheet === 'PAM') return 'PAM';
-  if (sheet === 'ITDR') return 'ITDR';
-  if (sheet === 'СВ') return null;
-  if (sheet === 'Сертификаты внедрения') return null;
+function inferPackageCapacity(name: string | null): number | null {
+  if (!name) return null;
+  const m =
+    name.match(/пакет\s*на\s*[-–—]?\s*(\d+)\s*пользовател/i) ||
+    name.match(/на\s+(\d+)\s*пользовател/i) ||
+    name.match(/(\d+)\s*пользовател/i);
+  return m ? Number(m[1]) : null;
+}
+
+function inferMetric(name: string | null, group: string | null): Metric | null {
+  const hay = `${group ?? ''} ${name ?? ''}`.toLowerCase();
+  if (/одновремен|concurrent|\bcs\b/.test(hay)) return 'concurrent_sessions';
+  if (/ресурс/.test(hay)) return 'resources';
+  if (/service\s*account|учетн/.test(hay)) return 'service_accounts';
+  if (/пользовател|\bul\b|пакет/.test(hay)) return 'users';
+  if (/monitoring|mfa|itdr/.test(hay)) return 'licensed_units';
   return null;
 }
 
-function pamColumnRoles(maxCol: number): ColumnRole[] {
-  const roles: ColumnRole[] = [];
-  const map: Array<[number, string, 'ordinary' | 'fstec' | null, CustomerGroupId]> = [
-    [2, 'standard', 'ordinary', 'standard'],
-    [3, 'fstec', 'fstec', 'standard'],
-    [4, 'gazprom', 'ordinary', 'gazprom'],
-    [5, 'gazprom_fstec', 'fstec', 'gazprom'],
-    [6, 'client_1', 'ordinary', 'standard'],
-    [7, 'client_2', 'ordinary', 'standard'],
-  ];
-  for (const [col, role, cert, group] of map) {
-    if (col <= maxCol) roles.push({ col, role, certification: cert, customerGroupId: group });
-  }
-  for (let col = 8; col <= maxCol; col++) {
-    roles.push({
-      col,
-      role: `client_${col - 5}`,
-      certification: 'ordinary',
-      customerGroupId: 'standard',
-    });
-  }
-  return roles;
-}
-
-function amCmColumnRoles(maxCol: number): ColumnRole[] {
-  const roles: ColumnRole[] = [
-    { col: 2, role: 'standard', certification: 'ordinary', customerGroupId: 'standard' },
-    { col: 3, role: 'gazprom', certification: 'ordinary', customerGroupId: 'gazprom' },
-    { col: 4, role: 'client_1', certification: 'ordinary', customerGroupId: 'standard' },
-    { col: 5, role: 'fstec', certification: 'fstec', customerGroupId: 'fstec' },
-  ];
-  for (let col = 6; col <= maxCol; col++) {
-    roles.push({
-      col,
-      role: `client_${col - 3}`,
-      certification: 'ordinary',
-      customerGroupId: 'standard',
-    });
-  }
-  return roles;
-}
-
-function inferLicenseFromSku(sku: string): { licenseType: LicenseType | 'not_applicable'; termMonths: number | null } {
-  const sub = sku.match(/(\d{2})(\d{4})(\d+)/);
-  if (sub) {
-    const termCode = Number(sub[2]);
-    if (termCode >= 120000 && termCode < 130000) return { licenseType: 'subscription', termMonths: 12 };
-    if (termCode >= 240000) return { licenseType: 'subscription', termMonths: 24 };
-    if (termCode >= 60000 && termCode < 70000) return { licenseType: 'subscription', termMonths: 6 };
-  }
-  if (/^\d{11,}$/.test(sku.replace(/[^0-9]/g, '')) && /12\d{4}/.test(sku)) {
-    return { licenseType: 'subscription', termMonths: 12 };
-  }
-  if (/ITDR\d{8}/.test(sku)) {
-    if (sku.includes('2400')) return { licenseType: 'subscription', termMonths: 24 };
-    return { licenseType: 'subscription', termMonths: 12 };
-  }
-  if (/^ITDR-\d{2}-\d+$/u.test(sku)) {
-    return { licenseType: 'perpetual', termMonths: null };
-  }
-  if (/^СВ-/u.test(sku)) {
+function inferLicense(name: string | null, group: string | null): {
+  licenseType: LicenseType | 'not_applicable' | null;
+  termMonths: number | null;
+} {
+  const hay = `${group ?? ''} ${name ?? ''}`.toLowerCase();
+  if (/бессроч/.test(hay)) return { licenseType: 'perpetual', termMonths: null };
+  if (/сертификат\s+на\s+внедрение|внедрен/.test(hay)) {
     return { licenseType: 'not_applicable', termMonths: null };
   }
-  if (/000000/.test(sku) || /-0{5,}/.test(sku)) {
-    return { licenseType: 'perpetual', termMonths: null };
-  }
-  if (/01\d{4}\d+/.test(sku)) {
-    return { licenseType: 'subscription', termMonths: 12 };
-  }
-  return { licenseType: 'subscription', termMonths: 12 };
-}
 
-function inferPackageCapacity(sku: string, name: string | null): number | null {
-  const fromName = name?.match(/(\d+)\s*пользовател/i);
-  if (fromName) return Number(fromName[1]);
-  const m = sku.match(/(\d{2})(\d{4})(\d+)/);
-  if (m) return Number(m[3]);
-  const tail = sku.match(/(\d{2,3})$/);
-  if (tail && sku.startsWith('PAM')) return Number(tail[1]);
-  return null;
-}
+  let months: number | null = null;
+  const years =
+    hay.match(/на\s+(\d+)\s*\([^)]+\)\s*года?/) ||
+    hay.match(/на\s+(\d+)\s*года?/) ||
+    hay.match(/(\d+)\s*\([^)]+\)\s*года?/) ||
+    hay.match(/(\d+)\s*года?/);
+  const termMonths =
+    hay.match(/на\s+(\d+)\s*мес/) ||
+    hay.match(/(\d+)\s*мес/);
+  if (/на\s+1\s*\(один\)\s*год|на\s+1\s+год|12\s*мес/.test(hay)) months = 12;
+  else if (years) {
+    const n = Number(years[1]);
+    months = Number.isFinite(n) ? n * 12 : null;
+  } else if (termMonths) {
+    const n = Number(termMonths[1]);
+    months = Number.isFinite(n) ? n : null;
+  }
 
-function inferItemId(product: ProductCode, sku: string, name: string | null, kind: ArticleEntryKind): string | null {
-  if (kind === 'implementation_cert') return null;
-  if (product === 'AM') {
-    if (/windows logon|wl/i.test(name ?? '') || /00000006/.test(sku)) return 'AM.WINDOWS_LOGON';
-    return 'AM.BASE';
+  if (
+    /подписк|срочн|обновлен|на\s+\d+\s*\([^)]+\)\s*года?|на\s+\d+\s*года?|\d+\s*мес/.test(hay) ||
+    months != null
+  ) {
+    return { licenseType: 'subscription', termMonths: months ?? 12 };
   }
-  if (product === 'CM') {
-    if (/агент|agent/i.test(name ?? '')) return 'CM.WINDOWS.AGENT';
-    return 'CM.WINDOWS.BASE';
-  }
-  if (product === 'PAM') {
-    if (/подключен|concurrent|cs/i.test(name ?? '') || /02\d{4}/.test(sku)) return 'PAM.CS';
-    return 'PAM.UL';
-  }
-  if (product === 'ITDR') {
-    if (/mfa/i.test(name ?? '') || /02/.test(sku)) return 'ITDR.MFA';
-    return 'ITDR.MONITORING';
-  }
-  return null;
+  return { licenseType: null, termMonths: null };
 }
 
 function inferKind(
-  sheet: string,
-  sku: string,
-  row: number,
   product: ProductCode | null,
+  name: string | null,
+  group: string | null,
+  metric: Metric | null,
+  licenseType: LicenseType | 'not_applicable' | null,
 ): ArticleEntryKind {
-  if (sheet === 'Сертификаты внедрения' || /^СВ-/u.test(sku)) return 'implementation_cert';
-  if (sheet === 'СВ') return 'special';
-  if (TEMPLATE_SHEETS.has(sheet)) return 'special';
-  if (product === 'PAM' && row >= 689 && row <= 689) return 'needs_review';
-  if (/^PF-\d+$/i.test(sku) && !/^PF-\d{8}/i.test(sku)) return 'needs_review';
-  if (/Gpam/i.test(sku)) return 'customer_variant';
-  if (/^GAM-/i.test(sku)) return 'customer_variant';
-  if (/^АCM-/u.test(sku)) return 'customer_variant';
-  if (product === 'PAM' && /01\d{4}25|01000025|01120025/.test(sku)) return 'package_ul';
-  if (product === 'PAM' && /02\d{4}/.test(sku)) return 'package_cs';
-  if (/00000001$/.test(sku)) return 'perpetual_base';
-  if (/12000001$/.test(sku)) return 'subscription';
-  return 'module';
+  const hay = `${group ?? ''} ${name ?? ''}`.toLowerCase();
+  if (/сертификат\s+на\s+внедрение|внедрен/.test(hay)) return 'implementation_cert';
+  if (/модул/.test(hay) && !/пакет/.test(hay)) return 'module';
+  if (product === 'PAM' && metric === 'users') return 'package_ul';
+  if (product === 'PAM' && metric === 'concurrent_sessions') return 'package_cs';
+  if (licenseType === 'subscription') return 'subscription';
+  if (licenseType === 'perpetual') return 'perpetual_base';
+  if (/разовые|уникальн|special/.test(hay)) return 'special';
+  return 'needs_review';
 }
 
-function inferMetric(product: ProductCode | null, kind: ArticleEntryKind): Metric | null {
-  if (kind === 'implementation_cert') return null;
-  if (product === 'PAM' && kind === 'package_cs') return 'concurrent_sessions';
-  if (product === 'PAM') return 'users';
-  if (product === 'ITDR') return 'licensed_units';
-  if (product === 'AM' || product === 'CM') return 'users';
+function inferItemId(
+  product: ProductCode | null,
+  kind: ArticleEntryKind,
+  metric: Metric | null,
+  name: string | null,
+): string | null {
+  if (!product) return null;
+  const hay = (name ?? '').toLowerCase();
+  if (product === 'PAM') {
+    if (/aapm/.test(hay)) return 'PAM.AAPM';
+    if (/sql\s*proxy/.test(hay)) return 'PAM.SQL_PROXY';
+    if (metric === 'concurrent_sessions' || kind === 'package_cs') return 'PAM.CS';
+    if (metric === 'resources') return 'PAM.RL';
+    if (kind === 'package_ul' || metric === 'users') return 'PAM.UL';
+    if (kind === 'module') return null;
+    return 'PAM.UL';
+  }
+  if (product === 'AM') {
+    if (/windows\s*logon|\bwl\b/.test(hay)) return 'AM.WINDOWS_LOGON';
+    if (/linux\s*logon/.test(hay)) return 'AM.LINUX_LOGON';
+    if (/rdp/.test(hay)) return 'AM.RDP_LOGON';
+    if (/ldap/.test(hay)) return 'AM.LDAP_PROXY';
+    if (/esso|sso/.test(hay)) return 'AM.ESSO';
+    if (/nps/.test(hay)) return 'AM.NPS_RADIUS';
+    if (/freeradius/.test(hay)) return 'AM.FREERADIUS';
+    if (/adfs/.test(hay)) return 'AM.ADFS';
+    if (/модул/.test(hay)) return null;
+    return 'AM.BASE';
+  }
+  if (product === 'CM') {
+    if (/agent|агент/.test(hay)) return 'CM.WINDOWS.AGENT';
+    return 'CM.WINDOWS.BASE';
+  }
+  if (product === 'ITDR') {
+    if (/mfa/.test(hay)) return 'ITDR.MFA';
+    if (/monitoring/.test(hay)) return 'ITDR.MONITORING';
+    return null;
+  }
   return null;
 }
 
-function classifyQuality(
-  sheet: string,
-  row: number,
-  col: number,
-  kind: ArticleEntryKind,
-): ArticleEntryQuality {
-  if (sheet === 'PAM' && row >= 689 && row <= 689 && col >= 2 && col <= 37) return 'ambiguous';
-  if (kind === 'needs_review') return 'needs_review';
-  if (TEMPLATE_SHEETS.has(sheet)) return 'needs_review';
-  return 'confirmed';
+function makeEntry(params: {
+  sheet: string;
+  row0: number;
+  col0: number;
+  sku: string;
+  name: string | null;
+  group: string | null;
+  product: ProductCode | null;
+  certification: 'ordinary' | 'fstec' | null;
+  customerGroupId: CustomerGroupId;
+  columnRole: string;
+  quality?: ArticleEntryQuality;
+  issues?: string[];
+  excludedByDefault?: boolean;
+  kindOverride?: ArticleEntryKind;
+}): ArticleEntry {
+  const { licenseType, termMonths } = inferLicense(params.name, params.group);
+  const metric = inferMetric(params.name, params.group);
+  const packageCapacity = inferPackageCapacity(params.name);
+  const kind =
+    params.kindOverride ??
+    (params.customerGroupId !== 'standard' && params.columnRole !== 'standard' && params.columnRole !== 'standard_fstec'
+      ? 'customer_variant'
+      : inferKind(params.product, params.name, params.group, metric, licenseType));
+  const product = params.product ?? 'PAM';
+  const itemId = inferItemId(params.product, kind, metric, params.name);
+  const issues = [...(params.issues ?? [])];
+  let quality: ArticleEntryQuality = params.quality ?? 'confirmed';
+  let excludedByDefault =
+    params.excludedByDefault ??
+    (kind === 'special' || kind === 'one_off' || kind === 'implementation_cert');
+  const hay = `${params.group ?? ''} ${params.name ?? ''}`.toLowerCase();
+  if (/обновлен/.test(hay)) {
+    issues.push('update_sku');
+    excludedByDefault = true;
+    if (quality === 'confirmed') quality = 'needs_review';
+  }
+  if (!params.product) {
+    issues.push('product_unspecified');
+    quality = 'needs_review';
+  }
+  if (kind === 'needs_review') quality = 'needs_review';
+
+  return {
+    id: `${params.sheet}|${cellAddr(params.row0, params.col0)}|${params.sku}`,
+    sku: params.sku,
+    name: params.name ?? params.sku,
+    product,
+    kind,
+    itemId,
+    licenseType,
+    termMonths,
+    packageCapacity,
+    metric,
+    certification: params.certification,
+    customerGroupId: params.customerGroupId,
+    quality,
+    sources: [
+      {
+        sheet: params.sheet,
+        cell: cellAddr(params.row0, params.col0),
+        columnRole: params.columnRole,
+      },
+    ],
+    issues,
+    excludedByDefault,
+    groupLabel: params.group,
+  };
 }
 
-function parseProductSheet(
-  sheetName: string,
-  ws: XLSX.WorkSheet,
-  entries: ArticleEntry[],
-  issues: string[],
-): number {
-  const product = productFromSheet(sheetName);
-  if (!product || TEMPLATE_SHEETS.has(sheetName)) return 0;
-
-  const rows = XLSX.utils.sheet_to_json<(string | number | null)[]>(ws, {
-    header: 1,
-    defval: null,
-    raw: false,
-  });
-
-  let maxCol = 0;
-  for (const row of rows) {
-    if (row) maxCol = Math.max(maxCol, row.length - 1);
+function importAmCm(sheetName: string, sheet: XLSX.WorkSheet, product: ProductCode, maxSkuCol: number): ArticleEntry[] {
+  const entries: ArticleEntry[] = [];
+  const range = sheetRange(sheet);
+  if (!range) return entries;
+  const groups = fillGroupColumn(sheet, range.r0, range.r1);
+  const cols = AM_CM_COLUMNS.filter((c) => c.col <= maxSkuCol);
+  for (let r = range.r0; r <= range.r1; r++) {
+    const name = cellText(sheet, r, 1);
+    for (const col of cols) {
+      const sku = cellText(sheet, r, col.col);
+      if (!sku || !isSkuCandidate(sku)) continue;
+      entries.push(
+        makeEntry({
+          sheet: sheetName,
+          row0: r,
+          col0: col.col,
+          sku,
+          name,
+          group: groups.get(r) ?? null,
+          product,
+          certification: col.certification,
+          customerGroupId: col.customerGroupId,
+          columnRole: col.role,
+        }),
+      );
+    }
   }
+  return entries;
+}
 
-  const columnRoles =
-    sheetName === 'PAM' ? pamColumnRoles(maxCol) : amCmColumnRoles(maxCol);
+function importPam(sheetName: string, sheet: XLSX.WorkSheet): ArticleEntry[] {
+  const entries: ArticleEntry[] = [];
+  const range = sheetRange(sheet);
+  if (!range) return entries;
+  const groups = fillGroupColumn(sheet, range.r0, range.r1);
+  for (let r = range.r0; r <= range.r1; r++) {
+    const name = cellText(sheet, r, 1);
+    const excelRow = r + 1;
+    const ambiguousHorizontal = excelRow === 690;
 
-  let current: ParsedRowContext = { groupLabel: null, name: null };
-  let count = 0;
-
-  for (let row = 0; row < rows.length; row++) {
-    const line = rows[row] ?? [];
-    const colA = normalizeCell(line[0]);
-    const colB = normalizeCell(line[1]);
-
-    if (colA && !colB && colA.length > 2) {
-      current.groupLabel = colA;
+    for (const col of PAM_COLUMN_MAP) {
+      const sku = cellText(sheet, r, col.col);
+      if (!sku || !isSkuCandidate(sku)) continue;
+      const customerGroupId: CustomerGroupId =
+        col.customerGroupId === 'gazprom' ? 'gazprom' : 'standard';
+      const issues: string[] = [];
+      let quality: ArticleEntryQuality = 'confirmed';
+      if (ambiguousHorizontal) {
+        issues.push('pam_horizontal_pack_ambiguous_C690_AL690');
+        quality = 'ambiguous';
+      }
+      const isCustomerCol = col.role !== 'standard' && col.role !== 'standard_fstec';
+      entries.push(
+        makeEntry({
+          sheet: sheetName,
+          row0: r,
+          col0: col.col,
+          sku,
+          name,
+          group: groups.get(r) ?? null,
+          product: 'PAM',
+          certification: col.certification,
+          customerGroupId,
+          columnRole: col.role,
+          quality,
+          issues,
+          kindOverride: ambiguousHorizontal ? 'needs_review' : isCustomerCol ? 'customer_variant' : undefined,
+        }),
+      );
     }
-    if (colB && colB.length > 8 && !looksLikeSku(colB)) {
-      current.name = colB;
+
+    if (ambiguousHorizontal) {
+      for (let c = 20; c <= range.c1; c++) {
+        const sku = cellText(sheet, r, c);
+        if (!sku || !isSkuCandidate(sku)) continue;
+        entries.push(
+          makeEntry({
+            sheet: sheetName,
+            row0: r,
+            col0: c,
+            sku,
+            name,
+            group: groups.get(r) ?? null,
+            product: 'PAM',
+            certification: null,
+            customerGroupId: 'standard',
+            columnRole: `unmapped_col_${colLetter(c)}`,
+            quality: 'ambiguous',
+            issues: ['pam_horizontal_pack_ambiguous_C690_AL690', 'column_not_in_client_map'],
+            kindOverride: 'needs_review',
+          }),
+        );
+      }
     }
+  }
+  return entries;
+}
 
-    for (const role of columnRoles) {
-      const raw = normalizeCell(line[role.col]);
-      if (!raw || !looksLikeSku(raw)) continue;
+function fillItdrGroupColumn(sheet: XLSX.WorkSheet, r0: number, r1: number): Map<number, string> {
+  const map = new Map<number, string>();
+  let last: string | null = null;
+  for (let r = r0; r <= r1; r++) {
+    const a = cellText(sheet, r, 0);
+    const b = cellText(sheet, r, 1);
+    if (b && /^(лицензия\s|indeed\s*itdr[\s])/i.test(b)) {
+      last = b;
+    }
+    if (a && !isSkuCandidate(a) && /гарантия|мес|год/i.test(a)) {
+      last = last ? `${last}; ${a}` : a;
+    }
+    if (last) map.set(r, last);
+  }
+  return map;
+}
 
-      const sku = raw;
-      const name = current.name ?? colB ?? sku;
-      const kind = inferKind(sheetName, sku, row, product);
-      if (TEMPLATE_SHEETS.has(sheetName)) continue;
-
-      const license = inferLicenseFromSku(sku);
-      const metric = inferMetric(product, kind);
-      const packageCapacity =
-        product === 'PAM' && (kind === 'package_ul' || kind === 'package_cs')
-          ? inferPackageCapacity(sku, name)
-          : null;
-      const quality = classifyQuality(sheetName, row, role.col, kind);
-      const issuesForEntry: string[] = [];
-      if (quality === 'ambiguous') issuesForEntry.push('PAM C690:AL690 ambiguous range');
-      if (quality === 'needs_review') issuesForEntry.push('Classification needs review');
-
-      const entry: ArticleEntry = {
-        id: stableId(sheetName, row, role.col, sku),
+function importItdr(sheetName: string, sheet: XLSX.WorkSheet): ArticleEntry[] {
+  const entries: ArticleEntry[] = [];
+  const range = sheetRange(sheet);
+  if (!range) return entries;
+  const groups = fillItdrGroupColumn(sheet, range.r0, range.r1);
+  for (let r = range.r0; r <= range.r1; r++) {
+    const name = cellText(sheet, r, 1);
+    const sku = cellText(sheet, r, 2);
+    if (!sku || !isSkuCandidate(sku)) continue;
+    // Skip section labels mistakenly placed in C (e.g. «основные»)
+    if (/^основные$/i.test(sku)) continue;
+    entries.push(
+      makeEntry({
+        sheet: sheetName,
+        row0: r,
+        col0: 2,
         sku,
         name,
-        product,
-        kind,
-        itemId: inferItemId(product, sku, name, kind),
-        licenseType: license.licenseType,
-        termMonths: license.termMonths,
-        packageCapacity,
-        metric,
-        certification: role.certification,
-        customerGroupId: role.customerGroupId,
-        quality,
-        sources: [{ sheet: sheetName, cell: cellRef(row, role.col), columnRole: role.role }],
-        issues: issuesForEntry,
-        excludedByDefault: kind === 'special' || kind === 'one_off' || kind === 'implementation_cert',
-        groupLabel: current.groupLabel,
-      };
-      entries.push(entry);
-      count++;
-    }
-  }
-
-  if (rows.length === 0) {
-    issues.push(`Sheet "${sheetName}" is empty or unreadable`);
-  }
-
-  return count;
-}
-
-function parseImplementationSheet(
-  sheetName: string,
-  ws: XLSX.WorkSheet,
-  entries: ArticleEntry[],
-): number {
-  const rows = XLSX.utils.sheet_to_json<(string | number | null)[]>(ws, {
-    header: 1,
-    defval: null,
-    raw: false,
-  });
-
-  let count = 0;
-  for (let row = 0; row < rows.length; row++) {
-    const line = rows[row] ?? [];
-    for (let col = 0; col < line.length; col++) {
-      const raw = normalizeCell(line[col]);
-      if (!raw || !looksLikeSku(raw)) continue;
-      if (!/^СВ-/u.test(raw) && sheetName === 'Сертификаты внедрения' && row < 3) continue;
-
-      const sku = raw;
-      const product: ProductCode =
-        sku.includes('AM') ? 'AM' : sku.includes('CM') ? 'CM' : sku.includes('PAM') ? 'PAM' : 'AM';
-      const name = normalizeCell(line[1]) ?? `Сертификат внедрения ${sku}`;
-
-      entries.push({
-        id: stableId(sheetName, row, col, sku),
-        sku,
-        name,
-        product,
-        kind: 'implementation_cert',
-        itemId: null,
-        licenseType: 'not_applicable',
-        termMonths: null,
-        packageCapacity: null,
-        metric: null,
-        certification: null,
-        customerGroupId: 'standard',
-        quality: 'confirmed',
-        sources: [{ sheet: sheetName, cell: cellRef(row, col), columnRole: 'implementation' }],
-        issues: [],
-        excludedByDefault: true,
-        groupLabel: null,
-      });
-      count++;
-    }
-  }
-  return count;
-}
-
-function parseItdrSheet(ws: XLSX.WorkSheet, entries: ArticleEntry[]): number {
-  const rows = XLSX.utils.sheet_to_json<(string | number | null)[]>(ws, {
-    header: 1,
-    defval: null,
-    raw: false,
-  });
-
-  let currentName: string | null = null;
-  let count = 0;
-
-  for (let row = 0; row < rows.length; row++) {
-    const line = rows[row] ?? [];
-    const colB = normalizeCell(line[1]);
-    if (colB && colB.length > 8 && !looksLikeSku(colB)) currentName = colB;
-
-    for (let col = 2; col < line.length; col++) {
-      const raw = normalizeCell(line[col]);
-      if (!raw || !looksLikeSku(raw)) continue;
-      if (!/^ITDR/i.test(raw)) continue;
-
-      const sku = raw;
-      const license = inferLicenseFromSku(sku);
-      const itemId = /02|MFA/i.test(`${sku} ${currentName ?? ''}`) ? 'ITDR.MFA' : 'ITDR.MONITORING';
-
-      entries.push({
-        id: stableId('ITDR', row, col, sku),
-        sku,
-        name: currentName ?? sku,
+        group: groups.get(r) ?? null,
         product: 'ITDR',
-        kind: license.licenseType === 'perpetual' ? 'perpetual_base' : 'subscription',
-        itemId,
-        licenseType: license.licenseType,
-        termMonths: license.termMonths,
-        packageCapacity: null,
-        metric: 'licensed_units',
         certification: 'ordinary',
         customerGroupId: 'standard',
-        quality: 'confirmed',
-        sources: [{ sheet: 'ITDR', cell: cellRef(row, col), columnRole: col === 2 ? 'standard' : 'term_variant' }],
-        issues: [],
-        excludedByDefault: false,
-        groupLabel: null,
-      });
-      count++;
-    }
+        columnRole: 'standard',
+      }),
+    );
   }
-  return count;
+  return entries;
 }
 
-function parseWorkbook(filePath: string): { catalog: ArticlesCatalogFile; report: ArticlesImportReport } {
-  const fileName = basename(filePath);
-  const buffer = readFileSync(filePath);
-  const fileHash = createHash('sha256').update(buffer).digest('hex');
-  const importedAt = new Date().toISOString();
-
-  const workbook = XLSX.read(buffer, { type: 'buffer', cellDates: false });
+function importImplementation(sheetName: string, sheet: XLSX.WorkSheet): ArticleEntry[] {
   const entries: ArticleEntry[] = [];
-  const issues: string[] = [];
-  const sheetStats: Record<string, number> = {};
-
-  for (const sheetName of EXPECTED_SHEETS) {
-    const ws = workbook.Sheets[sheetName];
-    if (!ws) {
-      issues.push(`Missing expected sheet: ${sheetName}`);
-      sheetStats[sheetName] = 0;
-      continue;
-    }
-
-    let count = 0;
-    if (sheetName === 'ITDR') {
-      count = parseItdrSheet(ws, entries);
-    } else if (sheetName === 'Сертификаты внедрения' || sheetName === 'СВ') {
-      count = parseImplementationSheet(sheetName, ws, entries);
-    } else if (!TEMPLATE_SHEETS.has(sheetName)) {
-      count = parseProductSheet(sheetName, ws, entries, issues);
-    }
-    sheetStats[sheetName] = count;
+  const range = sheetRange(sheet);
+  if (!range) return entries;
+  for (let r = range.r0; r <= range.r1; r++) {
+    const sku = cellText(sheet, r, 0);
+    const name = cellText(sheet, r, 1);
+    if (!sku || !isSkuCandidate(sku)) continue;
+    if (!/^СВ-/u.test(sku) && !/^CB-/i.test(sku)) continue;
+    let product: ProductCode | null = null;
+    if (/AM/i.test(sku)) product = 'AM';
+    else if (/CM/i.test(sku)) product = 'CM';
+    else if (/PAM/i.test(sku)) product = 'PAM';
+    entries.push(
+      makeEntry({
+        sheet: sheetName,
+        row0: r,
+        col0: 0,
+        sku,
+        name,
+        group: 'Сертификаты на внедрение',
+        product,
+        certification: null,
+        customerGroupId: 'standard',
+        columnRole: 'implementation',
+        kindOverride: 'implementation_cert',
+        excludedByDefault: true,
+      }),
+    );
   }
+  return entries;
+}
 
-  const deduped = new Map<string, ArticleEntry>();
-  for (const entry of entries) {
-    deduped.set(entry.id, entry);
+function importOneOff(sheetName: string, sheet: XLSX.WorkSheet): ArticleEntry[] {
+  const entries: ArticleEntry[] = [];
+  const range = sheetRange(sheet);
+  if (!range) return entries;
+  for (let r = range.r0; r <= range.r1; r++) {
+    const main = cellText(sheet, r, 1);
+    const special = cellText(sheet, r, 2);
+    const desc = cellText(sheet, r, 3) ?? cellText(sheet, r, 0);
+    const sku = special ?? main;
+    if (!sku || !isSkuCandidate(sku)) continue;
+    let product: ProductCode | null = null;
+    if (/^AM|GAM|АM/i.test(sku) || /Access Manager/i.test(desc ?? '')) product = 'AM';
+    else if (/^CM|АCM|ACM/i.test(sku) || /Credential|Certificate Manager/i.test(desc ?? '')) product = 'CM';
+    else if (/^PAM|PF|Gpam/i.test(sku) || /Privileged Access/i.test(desc ?? '')) product = 'PAM';
+    else if (/^ITDR/i.test(sku)) product = 'ITDR';
+    entries.push(
+      makeEntry({
+        sheet: sheetName,
+        row0: r,
+        col0: special ? 2 : 1,
+        sku,
+        name: desc,
+        group: 'разовыеуникальные артикулы',
+        product,
+        certification: null,
+        customerGroupId: 'standard',
+        columnRole: special ? 'special' : 'main',
+        kindOverride: 'one_off',
+        quality: 'needs_review',
+        issues: main && special && main !== special ? [`paired_main:${main}`] : [],
+        excludedByDefault: true,
+      }),
+    );
   }
-  const finalEntries = [...deduped.values()].sort((a, b) => a.sku.localeCompare(b.sku, 'ru'));
+  return entries;
+}
 
-  const catalog: ArticlesCatalogFile = {
-    catalogVersion: importedAt.slice(0, 10),
-    source: { fileName, fileHash, importedAt },
-    importStatus: 'ok',
-    entries: finalEntries,
-    specialExcludedByDefault: true,
-  };
-
+function writeMissing(message: string, issues: string[]): void {
   const report: ArticlesImportReport = {
-    status: 'ok',
-    message: `Импортировано ${finalEntries.length} артикулов из ${fileName}`,
-    importedAt,
-    rowCount: finalEntries.length,
-    fileName,
-    fileHash,
-    sheetStats,
+    status: 'missing_source',
+    message,
+    importedAt: new Date().toISOString(),
+    rowCount: 0,
+    fileName: null,
+    fileHash: null,
+    sheetStats: {},
     issues,
   };
-
-  return { catalog, report };
-}
-
-function writeMissingSource(): void {
   const catalog: ArticlesCatalogFile = {
     catalogVersion: null,
     source: null,
@@ -521,63 +593,125 @@ function writeMissingSource(): void {
     entries: [],
     specialExcludedByDefault: true,
   };
-  const report: ArticlesImportReport = {
-    status: 'missing_source',
-    message: 'Файл Excel со справочником артикулов не найден. Импорт не выполнялся.',
-    importedAt: null,
-    rowCount: 0,
-    fileName: null,
-    fileHash: null,
-    issues: [
-      'Expected file: reference/артикулы_09.04.2026 копия.xlsx',
-      'Also searched uploads/ and *артикул*.xlsx under workspace',
-    ],
-  };
-  writeFileSync(CATALOG_PATH, `${JSON.stringify(catalog, null, 2)}\n`, 'utf8');
-  writeFileSync(REPORT_PATH, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
+  writeFileSync(REPORT_PATH, JSON.stringify(report, null, 2) + '\n');
+  writeFileSync(CATALOG_PATH, JSON.stringify(catalog, null, 2) + '\n');
 }
 
 function main(): number {
-  const files = findExcelFiles();
-  if (files.length === 0) {
-    writeMissingSource();
-    console.error('Excel source not found. Wrote missing_source report to src/data/articlesImportReport.json');
+  const excelPath = findExcel();
+  if (!excelPath) {
+    writeMissing('Файл Excel со справочником артикулов не найден. Импорт не выполнялся.', [
+      'Expected: reference/артикулы_09.04.2026 копия.xlsx',
+      'Also searched uploads/ and workspace *артикул*.xlsx',
+    ]);
+    console.error('Excel source not found. Wrote missing_source report.');
     return 2;
   }
 
-  const filePath = files[0];
-  console.log(`Importing articles from: ${filePath}`);
-  try {
-    const { catalog, report } = parseWorkbook(filePath);
-    writeFileSync(CATALOG_PATH, `${JSON.stringify(catalog, null, 2)}\n`, 'utf8');
-    writeFileSync(REPORT_PATH, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
-    console.log(report.message);
-    if (report.issues?.length) {
-      console.warn('Import issues:', report.issues.join('; '));
+  const buf = readFileSync(excelPath);
+  const fileHash = createHash('sha256').update(buf).digest('hex');
+  const fileName = basename(excelPath);
+  const wb = XLSX.read(buf, { type: 'buffer', cellDates: false });
+
+  const issues: string[] = [];
+  const sheetStats: Record<string, number> = {};
+  const all: ArticleEntry[] = [];
+
+  for (const expected of EXPECTED_SHEETS) {
+    if (!wb.SheetNames.includes(expected)) {
+      issues.push(`Missing expected sheet: ${JSON.stringify(expected)}`);
+      sheetStats[expected] = 0;
     }
-    return 0;
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    const catalog: ArticlesCatalogFile = {
-      catalogVersion: null,
-      source: null,
-      importStatus: 'error',
-      entries: [],
-      specialExcludedByDefault: true,
-    };
-    const report: ArticlesImportReport = {
-      status: 'error',
-      message: `Ошибка импорта: ${message}`,
-      importedAt: new Date().toISOString(),
-      rowCount: 0,
-      fileName: basename(filePath),
-      issues: [message],
-    };
-    writeFileSync(CATALOG_PATH, `${JSON.stringify(catalog, null, 2)}\n`, 'utf8');
-    writeFileSync(REPORT_PATH, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
-    console.error(message);
-    return 1;
   }
+  for (const name of wb.SheetNames) {
+    if (!(EXPECTED_SHEETS as readonly string[]).includes(name)) {
+      issues.push(`Unexpected sheet present: ${JSON.stringify(name)}`);
+    }
+  }
+
+  if (wb.Sheets['АМ ']) {
+    const e = importAmCm('АМ ', wb.Sheets['АМ '], 'AM', 6);
+    sheetStats['АМ '] = e.length;
+    all.push(...e);
+  }
+  if (wb.Sheets['СМ']) {
+    const e = importAmCm('СМ', wb.Sheets['СМ'], 'CM', 5);
+    sheetStats['СМ'] = e.length;
+    all.push(...e);
+  }
+  if (wb.Sheets.PAM) {
+    const e = importPam('PAM', wb.Sheets.PAM);
+    sheetStats.PAM = e.length;
+    all.push(...e);
+  }
+  if (wb.Sheets.ITDR) {
+    const e = importItdr('ITDR', wb.Sheets.ITDR);
+    sheetStats.ITDR = e.length;
+    all.push(...e);
+  }
+  if (wb.Sheets['Сертификаты на внедрение']) {
+    const e = importImplementation('Сертификаты на внедрение', wb.Sheets['Сертификаты на внедрение']);
+    sheetStats['Сертификаты на внедрение'] = e.length;
+    all.push(...e);
+  } else {
+    sheetStats['Сертификаты на внедрение'] = 0;
+  }
+  if (wb.Sheets['разовыеуникальные артикулы']) {
+    const e = importOneOff('разовыеуникальные артикулы', wb.Sheets['разовыеуникальные артикулы']);
+    sheetStats['разовыеуникальные артикулы'] = e.length;
+    all.push(...e);
+  } else {
+    sheetStats['разовыеуникальные артикулы'] = 0;
+  }
+
+  // Templates / working sheet — recorded, not as sellable SKUs
+  sheetStats['Сертификаты на поддержку'] = 0;
+  sheetStats['рабочий лист'] = 0;
+  if (wb.Sheets['Сертификаты на поддержку']) {
+    issues.push('Sheet «Сертификаты на поддержку»: template only, SKUs not imported');
+  }
+  if (wb.Sheets['рабочий лист']) {
+    issues.push('Sheet «рабочий лист»: examples only, SKUs not imported');
+  }
+
+  // Flag incomplete PF
+  if (asText(wb.Sheets.PAM?.D722?.v) === 'PF') {
+    issues.push('PAM!D722 contains incomplete value «PF» (not imported as SKU)');
+  }
+  if (wb.Sheets.ITDR?.F12?.v === 0) {
+    issues.push('ITDR!F12 = 0 ignored (not a SKU/price)');
+  }
+
+  const uniqueSkus = new Set(all.map((e) => e.sku));
+  const catalog: ArticlesCatalogFile = {
+    catalogVersion: `xlsx-${fileHash.slice(0, 12)}`,
+    source: {
+      fileName,
+      fileHash,
+      importedAt: new Date().toISOString(),
+    },
+    importStatus: 'ok',
+    entries: all,
+    specialExcludedByDefault: true,
+  };
+
+  const report: ArticlesImportReport = {
+    status: 'ok',
+    message: `Импортировано ${all.length} записей (${uniqueSkus.size} уникальных исходных кодов) из ${fileName}`,
+    importedAt: catalog.source!.importedAt,
+    rowCount: all.length,
+    fileName,
+    fileHash,
+    sheetStats,
+    issues,
+  };
+
+  writeFileSync(CATALOG_PATH, JSON.stringify(catalog, null, 2) + '\n');
+  writeFileSync(REPORT_PATH, JSON.stringify(report, null, 2) + '\n');
+  console.log(`Import OK: ${all.length} entries, ${uniqueSkus.size} unique SKUs`);
+  console.log('Sheets:', sheetStats);
+  if (issues.length) console.log('Notes:', issues);
+  return 0;
 }
 
 process.exit(main());
