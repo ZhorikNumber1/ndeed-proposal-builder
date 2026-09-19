@@ -1,12 +1,9 @@
-import { useState } from 'react';
 import { useBuilder, validityLabel } from '../../app/BuilderProvider';
-import { validateStep1 } from '../../domain/validateProposal';
 import type { Validity } from '../../domain/types';
 
 export function StepDetails() {
   const { state, dispatch } = useBuilder();
   const p = state.proposal;
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validityKind = p.validity.kind;
   const validityValue =
@@ -24,6 +21,13 @@ export function StepDetails() {
     dispatch({ type: 'UPDATE_META', patch: { validity } });
   }
 
+  const missing = {
+    number: !p.number.trim(),
+    issueDate: !p.issueDate,
+    customer: !p.customer.legalName.trim(),
+    manager: !p.manager.displayName.trim(),
+  };
+
   return (
     <div className="panel panel-pad">
       <div className="panel-title">Данные коммерческого предложения</div>
@@ -39,7 +43,7 @@ export function StepDetails() {
             value={p.number}
             onChange={(e) => dispatch({ type: 'UPDATE_META', patch: { number: e.target.value } })}
           />
-          {errors.number ? <div className="field-error">{errors.number}</div> : null}
+          {missing.number ? <div className="field-error">Укажите номер КП</div> : null}
         </div>
         <div className="field">
           <label htmlFor="kp-date">Дата КП</label>
@@ -49,7 +53,7 @@ export function StepDetails() {
             value={p.issueDate}
             onChange={(e) => dispatch({ type: 'UPDATE_META', patch: { issueDate: e.target.value } })}
           />
-          {errors.issueDate ? <div className="field-error">{errors.issueDate}</div> : null}
+          {missing.issueDate ? <div className="field-error">Укажите дату КП</div> : null}
         </div>
         <div className="field">
           <label htmlFor="kp-customer">Наименование заказчика</label>
@@ -58,7 +62,7 @@ export function StepDetails() {
             value={p.customer.legalName}
             onChange={(e) => dispatch({ type: 'UPDATE_META', patch: { customerName: e.target.value } })}
           />
-          {errors['customer.legalName'] ? <div className="field-error">{errors['customer.legalName']}</div> : null}
+          {missing.customer ? <div className="field-error">Укажите наименование заказчика</div> : null}
         </div>
         <div className="field">
           <label htmlFor="kp-manager">Менеджер (метаданные)</label>
@@ -67,7 +71,7 @@ export function StepDetails() {
             value={p.manager.displayName}
             onChange={(e) => dispatch({ type: 'UPDATE_META', patch: { managerName: e.target.value } })}
           />
-          {errors['manager.displayName'] ? <div className="field-error">{errors['manager.displayName']}</div> : null}
+          {missing.manager ? <div className="field-error">Укажите менеджера</div> : null}
         </div>
         <div className="field">
           <label htmlFor="kp-validity-kind">Тип срока действия</label>
@@ -96,21 +100,6 @@ export function StepDetails() {
           />
           <div className="demo-calc-label">Сейчас: {validityLabel(p)}</div>
         </div>
-      </div>
-      <div style={{ marginTop: 16 }}>
-        <button
-          type="button"
-          className="bottom-btn next"
-          onClick={() => {
-            const issues = validateStep1(state.proposal);
-            const map: Record<string, string> = {};
-            for (const i of issues) if (i.fieldPath) map[i.fieldPath] = i.message;
-            setErrors(map);
-            if (issues.length === 0) dispatch({ type: 'SET_STEP', step: 2 });
-          }}
-        >
-          Далее →
-        </button>
       </div>
     </div>
   );
