@@ -90,7 +90,7 @@ export function createEmptyProposal(): Proposal {
   const now = new Date().toISOString();
   const cfg = pamDemoConfig(uid('cfg'));
   cfg.quantity = 0;
-  cfg.certified = null;
+  cfg.certified = false;
   cfg.kitQuantity = 0;
   cfg.enabled = true;
 
@@ -139,7 +139,8 @@ export function newConfiguration(product: Configuration['product']): Configurati
     platform: product === 'CM' ? 'windows' : null,
     metric: product === 'PAM' ? 'users' : product === 'ITDR' ? 'licensed_units' : 'users',
     quantity: product === 'AM' || product === 'CM' ? 100 : product === 'PAM' ? 5 : 1,
-    certified: null,
+    // Default to ordinary version — matches UI expectation and unblocks pricing.
+    certified: false,
     kitQuantity: 0,
     modules:
       product === 'ITDR'

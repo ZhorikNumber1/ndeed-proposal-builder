@@ -168,10 +168,11 @@ describe('demo calculator PAM', () => {
     expect(Number(r.totals.includedTaxAmount)).toBe(550);
   });
 
-  it('does not duplicate calculation issues', () => {
+  it('treats unspecified certification as ordinary and still flags kit mismatch', () => {
     const unspecified = calculateOptionSync(pamOption(25, 'subscription', null, 0), 1);
-    const codes = unspecified.issues.map((i) => i.code);
-    expect(codes.filter((c) => c === 'certification_unspecified')).toHaveLength(1);
+    expect(unspecified.items[0]?.sku).toBe('PAM-01120025');
+    expect(Number(unspecified.totals.amount)).toBe(2907000);
+    expect(unspecified.issues.filter((i) => i.code === 'certification_unspecified')).toHaveLength(0);
 
     const kitMismatch = calculateOptionSync(pamOption(25, 'subscription', false, 1), 1);
     expect(kitMismatch.issues.filter((i) => i.code === 'kit_without_cert')).toHaveLength(1);

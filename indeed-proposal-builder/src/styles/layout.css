@@ -626,6 +626,41 @@
 }
 
 .summary-panel { padding: 16px; }
+
+.quote-lines-scroll {
+  max-height: 220px;
+  overflow: auto;
+  margin-bottom: 12px;
+  border: 1px solid var(--line, #e4e8ef);
+  border-radius: 8px;
+}
+
+.quote-lines-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.quote-lines-table th,
+.quote-lines-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line, #e4e8ef);
+  text-align: left;
+  vertical-align: top;
+}
+
+.quote-lines-table th {
+  background: #f7f8fb;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+}
+
+.quote-lines-table td:nth-child(4),
+.quote-lines-table td:nth-child(5) {
+  white-space: nowrap;
+  text-align: right;
+}
 .summary-title { font-size: 17px; font-weight: 800; margin-bottom: 18px; }
 .summary-row {
   display: grid;

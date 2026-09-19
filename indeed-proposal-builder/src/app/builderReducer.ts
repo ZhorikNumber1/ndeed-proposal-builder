@@ -32,7 +32,7 @@ export type BuilderAction =
     } }
   | { type: 'SET_RAW_REQUEST'; value: string }
   | { type: 'SET_PARSE_CANDIDATE'; candidate: ParseCandidate | null }
-  | { type: 'APPLY_CANDIDATE' }
+  | { type: 'APPLY_CANDIDATE'; candidate?: ParseCandidate }
   | { type: 'UPDATE_CONFIGURATION'; optionId: string; configurationId: string; patch: Partial<Configuration> }
   | { type: 'UPDATE_MODULE'; optionId: string; configurationId: string; moduleId: string; quantity: number }
   | { type: 'ADD_MODULE'; optionId: string; configurationId: string; itemId: string }
@@ -175,7 +175,7 @@ export function builderReducer(state: BuilderState, action: BuilderAction): Buil
     case 'SET_PARSE_CANDIDATE':
       return { ...state, ui: { ...state.ui, parseCandidate: action.candidate } };
     case 'APPLY_CANDIDATE': {
-      const cand = state.ui.parseCandidate;
+      const cand = action.candidate ?? state.ui.parseCandidate;
       if (!cand || cand.products.length === 0) return state;
       const revision = state.revision + 1;
       let options = state.proposal.options.map((opt) => {
@@ -198,7 +198,15 @@ export function builderReducer(state: BuilderState, action: BuilderAction): Buil
         }
         // Apply term/license to option if detected
         let nextOpt = { ...opt, configurations: configs };
-        if (cand.termMonths != null && opt.licenseType === 'subscription') {
+        if (cand.licenseType === 'perpetual') {
+          nextOpt = { ...nextOpt, licenseType: 'perpetual', termMonths: null };
+        } else if (cand.licenseType === 'subscription') {
+          nextOpt = {
+            ...nextOpt,
+            licenseType: 'subscription',
+            termMonths: cand.termMonths ?? nextOpt.termMonths ?? 12,
+          };
+        } else if (cand.termMonths != null && opt.licenseType === 'subscription') {
           nextOpt = { ...nextOpt, termMonths: cand.termMonths };
         }
         return recalcOption(nextOpt, revision);

@@ -27,6 +27,9 @@ export function StepConfiguration() {
     const result = normalizeRequest(raw);
     dispatch({ type: 'SET_PARSE_CANDIDATE', candidate: result });
     dispatch({ type: 'SET_RAW_REQUEST', value: raw });
+    if (result.products.length > 0) {
+      dispatch({ type: 'APPLY_CANDIDATE', candidate: result });
+    }
   }
 
   function appendQuick(token: string) {
@@ -195,6 +198,41 @@ export function StepConfiguration() {
 
         <div className="panel summary-panel">
           <div className="summary-title">Итого по продуктам</div>
+          <div className="quote-lines-scroll">
+            {(option.calculation?.items.length ?? 0) === 0 ? (
+              <p className="summary-text">Выберите продукт через поиск или «Добавить» — строки появятся здесь.</p>
+            ) : (
+              <table className="quote-lines-table" aria-label="Ценовые строки текущей альтернативы">
+                <thead>
+                  <tr>
+                    <th>Артикул</th>
+                    <th>Наименование</th>
+                    <th>Кол-во</th>
+                    <th>Цена</th>
+                    <th>Сумма</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {option.calculation!.items.map((line) => (
+                    <tr key={line.id}>
+                      <td>{line.sku ?? (line.skuStatus === 'unresolved' ? 'Не найден' : '—')}</td>
+                      <td>{line.description}</td>
+                      <td>
+                        {line.saleQuantity}
+                        {line.saleUnit === 'package' && line.packageCapacity
+                          ? ` (пакет ${line.packageCapacity})`
+                          : line.saleUnit === 'kit'
+                            ? ' компл.'
+                            : ''}
+                      </td>
+                      <td>{line.unitPrice != null ? formatMoney(line.unitPrice) : 'Требуется уточнение'}</td>
+                      <td>{line.lineTotal != null ? formatMoney(line.lineTotal) : '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
           {state.proposal.options.map((o, idx) => (
             <div className="summary-row" key={o.id}>
               <div>
@@ -457,11 +495,16 @@ function ProductCard({
               <td>
                 <select
                   className="value-control"
-                  value={cfg.certified === true ? 'yes' : cfg.certified === false ? 'no' : 'unset'}
+                  value={cfg.certified === true ? 'yes' : 'no'}
+                  aria-label="Сертификация"
                   onChange={(e) => {
-                    const v = e.target.value;
-                    const certified = v === 'yes' ? true : v === 'no' ? false : null;
-                    const kitQuantity = certified === true && cfg.kitQuantity === 0 ? 1 : certified === false ? 0 : cfg.kitQuantity;
+                    const certified = e.target.value === 'yes';
+                    const kitQuantity =
+                      certified === true && cfg.kitQuantity === 0
+                        ? 1
+                        : certified === false
+                          ? 0
+                          : cfg.kitQuantity;
                     dispatch({
                       type: 'UPDATE_CONFIGURATION',
                       optionId,
@@ -470,7 +513,6 @@ function ProductCard({
                     });
                   }}
                 >
-                  <option value="unset">Не уточнено</option>
                   <option value="no">Обычная версия</option>
                   <option value="yes">Сертифицированная версия</option>
                 </select>

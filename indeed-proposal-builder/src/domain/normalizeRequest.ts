@@ -161,16 +161,22 @@ export function normalizeRequest(rawInput: string): ParseCandidate {
 
   text = normalize(text);
 
-  // Product codes
+  // Product codes and full-name aliases
   const productHits: ProductCode[] = [];
   const productPatterns: Array<[RegExp, ProductCode]> = [
     [/\bitdr\b/i, 'ITDR'],
+    [/\bidentity\s*threat\b/i, 'ITDR'],
     [/\bpam\b/i, 'PAM'],
+    [/\bprivileged\s*access\s*manager\b/i, 'PAM'],
     [/\bam\b/i, 'AM'],
+    [/\baccess\s*manager\b/i, 'AM'],
     [/\bcm\b/i, 'CM'],
+    [/\bcertificate\s*manager\b/i, 'CM'],
   ];
-  for (const [pat, code] of productPatterns) {
-    if (pat.test(text)) {
+  // Prefer longer aliases first so "Privileged Access Manager" does not become AM via "Access Manager"
+  const orderedPatterns = [...productPatterns].sort((a, b) => b[0].source.length - a[0].source.length);
+  for (const [pat, code] of orderedPatterns) {
+    if (pat.test(text) && !productHits.includes(code)) {
       productHits.push(code);
       tokens.push({ id: tid(), kind: 'product', label: code, value: code, confirmed: false });
       text = text.replace(pat, ' ');
@@ -317,6 +323,7 @@ export function normalizeRequest(rawInput: string): ParseCandidate {
       questions.push('Платформа CM требует уточнения (Windows / Мультиплатформа)');
     }
 
+    const resolvedCertified = certified === true ? true : false;
     const partial: Partial<Configuration> & { product: ProductCode } = {
       product: code,
       metric:
@@ -326,9 +333,9 @@ export function normalizeRequest(rawInput: string): ParseCandidate {
             ? 'licensed_units'
             : 'users',
       quantity: quantity ?? undefined,
-      certified: code === 'PAM' ? certified : certified === true ? true : null,
-      kitQuantity: code === 'PAM' && certified === true ? 1 : 0,
-      platform: code === 'CM' ? null : null,
+      certified: resolvedCertified,
+      kitQuantity: code === 'PAM' && resolvedCertified === true ? 1 : 0,
+      platform: code === 'CM' ? 'windows' : null,
       enabled: true,
       modules: productModules.map((m, i) => {
         const metric: Metric =
@@ -385,18 +392,28 @@ export function candidateToConfiguration(
   partial: Partial<Configuration> & { product: ProductCode },
   id: string,
 ): Configuration {
+  const quantity =
+    partial.quantity != null && Number.isFinite(partial.quantity) && partial.quantity > 0
+      ? partial.quantity
+      : partial.product === 'AM' || partial.product === 'CM'
+        ? 100
+        : partial.product === 'PAM'
+          ? 5
+          : 1;
   return {
     id,
     product: partial.product,
-    platform: partial.platform ?? null,
-    metric: partial.metric ?? 'users',
-    quantity: partial.quantity && partial.quantity > 0 ? partial.quantity : 0,
-    certified: partial.certified ?? null,
+    platform: partial.platform ?? (partial.product === 'CM' ? 'windows' : null),
+    metric:
+      partial.metric ??
+      (partial.product === 'PAM' ? 'users' : partial.product === 'ITDR' ? 'licensed_units' : 'users'),
+    quantity,
+    certified: partial.certified ?? false,
     kitQuantity: partial.kitQuantity ?? 0,
     modules: (partial.modules ?? []).map((m, i) => ({
       ...m,
       id: m.id || `${id}-mod-${i}`,
-      quantity: m.quantity > 0 ? m.quantity : partial.quantity ?? 0,
+      quantity: m.quantity > 0 ? m.quantity : quantity,
     })),
     enabled: partial.enabled ?? true,
   };

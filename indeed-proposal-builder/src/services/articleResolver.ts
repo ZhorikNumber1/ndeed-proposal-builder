@@ -163,10 +163,19 @@ function scoreEntry(entry: ArticleEntry): number {
   // Prefer primary license packs over warranty / update / review leftovers.
   if (entry.quality === 'confirmed') score += 10;
   if (entry.kind !== 'needs_review') score += 5;
-  if (!/гарантия/i.test(entry.groupLabel ?? '')) score += 8;
-  if (!/обновлен/i.test(entry.groupLabel ?? '') && !entry.issues.includes('update_sku')) score += 8;
+  const group = entry.groupLabel ?? '';
+  if (!/гарантия/i.test(group)) score += 8;
+  else if (/гарантия\s*12|^\s*[^;]*12\s*мес/i.test(group) && !/гарантия\s*(24|36)|(24|36)\s*мес/i.test(group)) {
+    score += 6;
+  } else if (/гарантия\s*(24|36)|(24|36)\s*мес/i.test(group)) {
+    score -= 5;
+  }
+  if (!/обновлен/i.test(group) && !entry.issues.includes('update_sku')) score += 8;
   const role = entry.sources[0]?.columnRole;
   if (role === 'standard' || role === 'standard_fstec') score += 4;
+  // Prefer base perpetual/subscription families over extended-warranty SKU codes.
+  if (/^(PAM|PF)-0/i.test(entry.sku) || /^(AM|CM|АCM|GAM|GCM)-/i.test(entry.sku)) score += 3;
+  if (/^(PAM|PF)-5/i.test(entry.sku)) score -= 4;
   return score;
 }
 

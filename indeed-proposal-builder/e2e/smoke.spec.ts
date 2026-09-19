@@ -56,6 +56,34 @@ test('articles page shows imported catalog', async ({ page }) => {
   await expect(page.getByText('PAM-01120025', { exact: true }).first()).toBeVisible({ timeout: 15_000 });
 });
 
+test('search PAM 25 fills price table and SKU', async ({ page }) => {
+  await page.addInitScript(() => {
+    try {
+      localStorage.clear();
+    } catch {
+      /* ignore */
+    }
+  });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Создать КП' }).click();
+  await expect(page).toHaveURL(/\/proposals\/.+\/edit/);
+  await page.getByLabel('Наименование заказчика').fill('ООО Тест');
+  await page.getByLabel('Номер КП').fill('КП-FLOW-1');
+  await page.getByLabel('Менеджер').fill('Тестов');
+  await page.getByRole('button', { name: /^Далее/ }).click();
+
+  const input = page.getByLabel('Свободный ввод запроса');
+  await input.fill('PAM 25');
+  await input.press('Enter');
+
+  await expect(page.getByText('Определённые продукты').first()).toBeVisible();
+  await expect(page.getByText('PAM-01120025', { exact: true }).first()).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('.quote-lines-table')).toContainText('2');
+  await expect(page.locator('.quote-lines-table')).toContainText('907');
+  await expect(page.locator('.quote-lines-table')).toContainText('пакет 25');
+  await expect(page.locator('.summary-panel .sum').first()).toContainText('907');
+});
+
 test('open example reaches builder without crash', async ({ page }) => {
   await page.addInitScript(() => {
     try {

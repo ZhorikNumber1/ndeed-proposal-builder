@@ -156,18 +156,10 @@ function buildLine(params: {
   };
 }
 
-function certificationFactor(certified: boolean | null): { c: number | null; issue?: ValidationIssue } {
+function certificationFactor(certified: boolean | null): { c: number; issue?: ValidationIssue } {
   if (certified === true) return { c: 1.3 };
-  if (certified === false) return { c: 1 };
-  return {
-    c: null,
-    issue: {
-      code: 'certification_unspecified',
-      message: 'Версия (обычная / сертифицированная) не уточнена — коэффициент не подставлен',
-      severity: 'warning',
-      blocksRelease: true,
-    },
-  };
+  // null / false → ordinary version (c=1). Explicit null no longer blocks pricing.
+  return { c: 1 };
 }
 
 function pricePamBase(
@@ -177,10 +169,7 @@ function pricePamBase(
 ): PricedLine[] {
   const issues: ValidationIssue[] = [];
   const results: PricedLine[] = [];
-  const { c, issue } = certificationFactor(config.certified);
-  if (issue) {
-    issues.push({ ...issue, configurationId: config.id, optionId: option.id });
-  }
+  const { c } = certificationFactor(config.certified);
 
   if (config.metric === 'resources') {
     issues.push({
@@ -261,7 +250,7 @@ function pricePamBase(
 
   let total: number | null = null;
 
-  if (c != null && (option.licenseType === 'perpetual' || option.termMonths === 12)) {
+  if (option.licenseType === 'perpetual' || option.termMonths === 12) {
     const priced = priceStandard(U, option.licenseType, c, terms.signedDiscount, config.quantity);
     total = priced.total;
   }
@@ -281,7 +270,7 @@ function pricePamBase(
       tax: EXEMPT_TAX,
       licenseType: option.licenseType,
       termMonths: option.termMonths,
-      certified: config.certified,
+      certified: config.certified === true,
     }),
     issues,
   });
