@@ -15,7 +15,7 @@ function tid(): string {
 }
 
 const MODULE_ALIASES: Array<{ patterns: RegExp[]; itemId: string; product?: ProductCode }> = [
-  { patterns: [/\bwindows\s*logon\b/i, /\bwl\b/i], itemId: 'AM.WINDOWS_LOGON', product: 'AM' },
+  { patterns: [/\bwindows\s*logon\b/i, /\bwl\b/i], itemId: 'AM.LINUX_LOGON', product: 'AM' },
   { patterns: [/\blinux\s*logon\b/i, /\bll\b/i], itemId: 'AM.LINUX_LOGON', product: 'AM' },
   { patterns: [/\brdp\s*(windows\s*)?logon\b/i, /\brdp\b/i], itemId: 'AM.RDP_LOGON', product: 'AM' },
   { patterns: [/\bldap(\s*proxy)?\b/i], itemId: 'AM.LDAP_PROXY', product: 'AM' },

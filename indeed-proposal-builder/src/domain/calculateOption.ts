@@ -461,41 +461,13 @@ function priceAm(
   });
 
   for (const mod of config.modules) {
-    if (!AM_MODULE_IDS.has(mod.itemId)) continue;
+    // WL is always priced as LL (same module tariff); keep display id if already LINUX_LOGON.
+    const pricedItemId = mod.itemId === 'AM.WINDOWS_LOGON' ? 'AM.LINUX_LOGON' : mod.itemId;
+    if (!AM_MODULE_IDS.has(pricedItemId) && !AM_MODULE_IDS.has(mod.itemId)) continue;
     const qty = mod.quantity || config.quantity;
+    const effectiveId = AM_MODULE_IDS.has(pricedItemId) ? pricedItemId : mod.itemId;
 
-    if (mod.itemId === 'AM.WINDOWS_LOGON' && option.licenseType === 'subscription') {
-      issues.push({
-        code: 'wl_annual_missing',
-        message: 'Годовая формула Windows Logon (D6) в исходнике отсутствует — требуется уточнение',
-        severity: 'warning',
-        blocksRelease: true,
-        configurationId: config.id,
-        optionId: option.id,
-      });
-      results.push({
-        line: buildLine({
-          id: `${config.id}-${mod.itemId}`,
-          configurationId: config.id,
-          itemId: mod.itemId,
-          description: lineDesc(mod.itemId, 'модуль Windows Logon для программы для ЭВМ Indeed Access Manager', qty, 'users', option.licenseType, option.termMonths, config.certified),
-          calculatorQuantity: qty,
-          packageCapacity: null,
-          saleQuantity: qty,
-          saleUnit: 'license',
-          unitPrice: null,
-          lineTotal: null,
-          tax: EXEMPT_TAX,
-          licenseType: option.licenseType,
-          termMonths: option.termMonths,
-          certified: config.certified,
-        }),
-        issues: [],
-      });
-      continue;
-    }
-
-    if (mod.itemId === 'AM.MDP' && option.licenseType === 'subscription') {
+    if (effectiveId === 'AM.MDP' && option.licenseType === 'subscription') {
       issues.push({
         code: 'mdp_qty_ref',
         message: 'Годовая стоимость MDP в исходнике ссылается на количество RDP — требуется уточнение',
@@ -506,9 +478,9 @@ function priceAm(
       });
     }
 
-    const tiers = mod.itemId === 'AM.BIOMETRICS' ? AM_BASE_TIERS : AM_MODULE_TIERS;
+    const tiers = effectiveId === 'AM.BIOMETRICS' ? AM_BASE_TIERS : AM_MODULE_TIERS;
     const U = averageUnitCost(qty, tiers);
-    const mult = mod.itemId === 'AM.ESSO' ? 2 : 1;
+    const mult = effectiveId === 'AM.ESSO' ? 2 : 1;
     let unit: number | null = null;
     let total: number | null = null;
     if (canPrice) {
@@ -516,12 +488,18 @@ function priceAm(
       unit = p.unitAfter;
       total = p.total;
     }
+    const descName =
+      mod.itemId === 'AM.WINDOWS_LOGON'
+        ? 'модуль Linux Logon (WL считается как LL)'
+        : effectiveId === 'AM.LINUX_LOGON'
+          ? 'модуль Linux Logon для программы для ЭВМ Indeed Access Manager'
+          : effectiveId;
     results.push({
       line: buildLine({
         id: `${config.id}-${mod.itemId}`,
         configurationId: config.id,
-        itemId: mod.itemId,
-        description: lineDesc(mod.itemId, mod.itemId, qty, 'users', option.licenseType, option.termMonths, config.certified),
+        itemId: effectiveId,
+        description: lineDesc(effectiveId, descName, qty, 'users', option.licenseType, option.termMonths, config.certified),
         calculatorQuantity: qty,
         packageCapacity: null,
         saleQuantity: qty,

@@ -408,30 +408,49 @@ export function builderReducer(state: BuilderState, action: BuilderAction): Buil
     }
     case 'SET_ALTERNATIVES_MODE': {
       const revision = state.revision + 1;
-      let options = [...state.proposal.options];
-      const sub = options.find((o) => o.licenseType === 'subscription');
-      const perp = options.find((o) => o.licenseType === 'perpetual');
-      if (action.mode === 'subscription' && sub) {
+      const current = [...state.proposal.options];
+      let sub = current.find((o) => o.licenseType === 'subscription') ?? null;
+      let perp = current.find((o) => o.licenseType === 'perpetual') ?? null;
+      const source = sub ?? perp ?? current[0];
+      if (!source) return state;
+
+      const makeId = () => `opt-${Math.random().toString(36).slice(2, 8)}`;
+
+      if (!sub) {
+        sub = {
+          ...source,
+          id: makeId(),
+          label: 'Подписка 12 месяцев',
+          licenseType: 'subscription',
+          termMonths: 12,
+          commercialTerms: { ...defaultCommercialTerms(), ...source.commercialTerms },
+          configurations: cloneConfigurations(source.configurations),
+          calculation: null,
+        };
+      }
+      if (!perp) {
+        perp = {
+          ...source,
+          id: makeId(),
+          label: 'Бессрочная',
+          licenseType: 'perpetual',
+          termMonths: null,
+          commercialTerms: { ...defaultCommercialTerms(), ...source.commercialTerms },
+          configurations: cloneConfigurations(source.configurations),
+          calculation: null,
+        };
+      }
+
+      let options: ProposalOption[];
+      if (action.mode === 'subscription') {
         options = [sub];
-      } else if (action.mode === 'perpetual' && perp) {
+      } else if (action.mode === 'perpetual') {
         options = [perp];
-      } else if (action.mode === 'both') {
-        if (sub && perp) options = [sub, perp];
-        else if (sub && !perp) {
-          const copy: ProposalOption = {
-            ...sub,
-            id: `opt-${Math.random().toString(36).slice(2, 8)}`,
-            label: 'Бессрочная',
-            licenseType: 'perpetual',
-            termMonths: null,
-            commercialTerms: { ...defaultCommercialTerms(), ...sub.commercialTerms },
-            configurations: cloneConfigurations(sub.configurations),
-            calculation: null,
-          };
-          options = [sub, recalcOption(copy, revision)];
-        }
+      } else {
+        options = [sub, perp];
       }
       options = options.map((o) => recalcOption(o, revision));
+      const activeStillExists = options.some((o) => o.id === state.ui.activeOptionId);
       return {
         ...state,
         revision,
@@ -439,7 +458,7 @@ export function builderReducer(state: BuilderState, action: BuilderAction): Buil
         ui: {
           ...state.ui,
           dirty: true,
-          activeOptionId: options[0]?.id ?? '',
+          activeOptionId: activeStillExists ? state.ui.activeOptionId : options[0]?.id ?? '',
         },
       };
     }

@@ -65,8 +65,10 @@ describe('normalizeRequest', () => {
     expect(r.products[0]?.product).toBe('AM');
     expect(r.products[0]?.quantity).toBe(437);
     const ids = r.products[0]?.modules?.map((m) => m.itemId) ?? [];
-    expect(ids).toContain('AM.WINDOWS_LOGON');
+    // WL is always treated as LL
+    expect(ids).toContain('AM.LINUX_LOGON');
     expect(ids).toContain('AM.LDAP_PROXY');
+    expect(ids).not.toContain('AM.WINDOWS_LOGON');
   });
 
   it('negates certification', () => {
@@ -209,8 +211,8 @@ describe('alternatives independence', () => {
   });
 });
 
-describe('WL subscription unknown price', () => {
-  it('does not turn missing WL annual into zero total', () => {
+describe('WL priced as LL', () => {
+  it('prices WL subscription using LL module tariff', () => {
     const option: ProposalOption = {
       id: 'o',
       label: 'sub',
@@ -235,10 +237,10 @@ describe('WL subscription unknown price', () => {
       calculation: null,
     };
     const r = calculateOptionSync(option, 1);
-    const wl = r.items.find((i) => i.itemId === 'AM.WINDOWS_LOGON');
-    expect(wl?.lineTotal).toBeNull();
-    expect(r.totals.amount).toBeNull();
-    expect(r.status).not.toBe('complete');
+    const wl = r.items.find((i) => i.itemId === 'AM.LINUX_LOGON' || i.itemId === 'AM.WINDOWS_LOGON');
+    expect(wl?.itemId).toBe('AM.LINUX_LOGON');
+    expect(wl?.lineTotal).not.toBeNull();
+    expect(Number(wl?.lineTotal)).toBeGreaterThan(0);
   });
 });
 

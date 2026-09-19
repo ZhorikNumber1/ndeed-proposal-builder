@@ -618,7 +618,7 @@ function ModulesEditor({ cfg, optionId }: { cfg: Configuration; optionId: string
   const { dispatch } = useBuilder();
   const suggestions =
     cfg.product === 'AM'
-      ? ['AM.WINDOWS_LOGON', 'AM.LDAP_PROXY', 'AM.ADFS', 'AM.ESSO', 'AM.RDP_LOGON']
+      ? ['AM.LINUX_LOGON', 'AM.LDAP_PROXY', 'AM.ADFS', 'AM.ESSO', 'AM.RDP_LOGON']
       : cfg.product === 'CM'
         ? ['CM.WINDOWS.AGENT']
         : cfg.product === 'PAM'
