@@ -182,7 +182,7 @@ function envelopeFromLegacy(stored: StoredDraft, id: string): DraftEnvelope {
     proposal,
     builder: {
       activeStep: stored.ui.activeStep,
-      activeOptionId: stored.ui.activeOptionId || (proposal.options[0]?.id ?? null),
+      activeOptionId: stored.ui.activeOptionId || proposal.options[0]?.id || null,
     },
     revision: 1,
     createdAt: created,
