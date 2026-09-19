@@ -79,6 +79,21 @@ describe('normalizeRequest', () => {
     expect(r.conflicts.length).toBeGreaterThan(0);
   });
 
+  it('parses compact PAM25 without leftover token', () => {
+    const r = normalizeRequest('PAM25 FSTEC');
+    expect(r.products[0]?.product).toBe('PAM');
+    expect(r.products[0]?.quantity).toBe(25);
+    expect(r.products[0]?.certified).toBe(true);
+    expect(r.unrecognized.join('|')).not.toMatch(/PAM25/i);
+  });
+
+  it('does not leave Cyrillic stem fragments after пользователей', () => {
+    const r = normalizeRequest('PAM ФСТЭК на 77 пользователей');
+    expect(r.products[0]?.quantity).toBe(77);
+    expect(r.unrecognized).not.toContain('ей');
+    expect(r.unrecognized).not.toContain('на');
+  });
+
   it('does not treat 12 months as quantity', () => {
     const r = normalizeRequest('PAM на 12 месяцев');
     expect(r.termMonths).toBe(12);
@@ -151,6 +166,15 @@ describe('demo calculator PAM', () => {
     expect(Number(r.totals.exemptAmount)).toBe(3779100);
     expect(Number(r.totals.taxableGrossAmount)).toBe(3050);
     expect(Number(r.totals.includedTaxAmount)).toBe(550);
+  });
+
+  it('does not duplicate calculation issues', () => {
+    const unspecified = calculateOptionSync(pamOption(25, 'subscription', null, 0), 1);
+    const codes = unspecified.issues.map((i) => i.code);
+    expect(codes.filter((c) => c === 'certification_unspecified')).toHaveLength(1);
+
+    const kitMismatch = calculateOptionSync(pamOption(25, 'subscription', false, 1), 1);
+    expect(kitMismatch.issues.filter((i) => i.code === 'kit_without_cert')).toHaveLength(1);
   });
 
   it('removes kit lines when kitQuantity=0', () => {

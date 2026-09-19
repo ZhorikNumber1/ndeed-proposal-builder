@@ -185,15 +185,16 @@ export function normalizeRequest(rawInput: string): ParseCandidate {
   if (/\bcs\b|одновременн/i.test(text) || /\bcs\b/i.test(raw)) {
     metric = 'concurrent_sessions';
     tokens.push({ id: tid(), kind: 'metric', label: 'CS', value: metric, confirmed: false });
-    text = text.replace(/\bcs\b|одновременн\w*/gi, ' ');
+    text = text.replace(/\bcs\b|одновременн[а-яёa-z]*/gi, ' ');
   } else if (/\brl\b|ресурс/i.test(text)) {
     metric = 'resources';
     tokens.push({ id: tid(), kind: 'metric', label: 'RL', value: metric, confirmed: false });
-    text = text.replace(/\brl\b|ресурс\w*/gi, ' ');
+    text = text.replace(/\brl\b|ресурс[а-яёa-z]*/gi, ' ');
   } else if (/пользовател/i.test(text) || /\bul\b/i.test(text)) {
     metric = 'users';
     tokens.push({ id: tid(), kind: 'metric', label: 'UL', value: metric, confirmed: false });
-    text = text.replace(/пользовател\w*|\bul\b/gi, ' ');
+    // Cyrillic stems: \w without /u does not match letters — use explicit Cyrillic class
+    text = text.replace(/пользовател[а-яёa-z]*/gi, ' ').replace(/\bul\b/gi, ' ');
   }
 
   text = normalize(text);
@@ -210,13 +211,16 @@ export function normalizeRequest(rawInput: string): ParseCandidate {
     numbers.push(n);
   }
 
-  // Also from compact PAM25
+  // Also from compact PAM25 / PAM46 (and strip leftover compact token from working text)
   if (compact) {
     const n = Number(compact[2]);
     if (!numbers.includes(n)) numbers.push(n);
-    if (!productHits.includes(compact[1].toUpperCase() as ProductCode)) {
-      productHits.push(compact[1].toUpperCase() as ProductCode);
+    const productCode = compact[1].toUpperCase() as ProductCode;
+    if (!productHits.includes(productCode)) {
+      productHits.push(productCode);
+      tokens.push({ id: tid(), kind: 'product', label: productCode, value: productCode, confirmed: false });
     }
+    text = normalize(text.replace(new RegExp(`\\b${compact[1]}\\s*${compact[2]}\\b`, 'i'), ' '));
   }
 
   if (numbers.length > 1) {
@@ -354,9 +358,12 @@ export function normalizeRequest(rawInput: string): ParseCandidate {
   }
 
   // Remaining unrecognized tokens
-  const leftover = normalize(text).replace(/\b\d+\b/g, ' ').replace(/\bна\b/gi, ' ');
+  // Strip filler Cyrillic prepositions without relying on \b/\w (ASCII-only in JS without /u)
+  const leftover = normalize(text)
+    .replace(/\b\d+\b/g, ' ')
+    .replace(/(?:^|\s)(?:на|и|для|по|the|of)(?=\s|$)/gi, ' ');
   for (const part of leftover.split(/\s+/).filter(Boolean)) {
-    if (/^(и|для|по|the|of)$/i.test(part)) continue;
+    if (/^(и|для|по|на|the|of)$/i.test(part)) continue;
     unrecognized.push(part);
     tokens.push({ id: tid(), kind: 'unknown', label: part, value: part, confirmed: false });
   }

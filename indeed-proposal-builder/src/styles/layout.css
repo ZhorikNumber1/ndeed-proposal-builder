@@ -22,10 +22,17 @@
   height: 100vh;
   overflow: hidden;
   z-index: 20;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .app-shell.sidebar-collapsed .sidebar {
-  padding: 24px 10px 20px;
+  padding: 24px 8px 20px;
+  width: var(--sidebar-collapsed);
+  max-width: var(--sidebar-collapsed);
+  justify-self: stretch;
 }
 
 .brand {
@@ -83,9 +90,11 @@
 
 .app-shell.sidebar-collapsed .nav-item span {
   width: 0;
+  max-width: 0;
   opacity: 0;
   overflow: hidden;
   pointer-events: none;
+  position: absolute;
 }
 
 .nav-item.active {
@@ -140,8 +149,10 @@
 }
 .app-shell.sidebar-collapsed .collapse span:last-child {
   width: 0;
+  max-width: 0;
   opacity: 0;
   overflow: hidden;
+  position: absolute;
 }
 
 .collapse .circle {
@@ -945,17 +956,67 @@
     top: 0;
     transform: translateX(-105%);
     width: var(--sidebar);
+    max-width: min(var(--sidebar), 88vw);
     transition: transform .22s ease;
     box-shadow: 8px 0 24px rgba(0,0,0,.12);
   }
   .app-shell.drawer-open .sidebar {
     transform: translateX(0);
   }
+  .app-shell.sidebar-collapsed .sidebar {
+    width: var(--sidebar);
+    max-width: min(var(--sidebar), 88vw);
+    transform: translateX(-105%);
+  }
   .app-shell { grid-template-columns: 1fr; }
   .mobile-menu-btn { display: inline-flex; align-items: center; }
   .form-grid { grid-template-columns: 1fr; }
   .export-row { grid-template-columns: 1fr; }
   .topbar { padding: 0 14px; gap: 10px; }
-  .workspace { padding: 14px 14px 100px; }
+  .workspace { padding: 14px 14px 100px; overflow-x: hidden; }
   .structure-main { grid-template-columns: 1fr; }
+  .status-card {
+    grid-template-columns: 1fr;
+  }
+  .actions-bottom {
+    flex-wrap: wrap;
+    justify-content: stretch;
+  }
+  .bottom-btn,
+  .bottom-btn.next,
+  .bottom-btn.small {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .updated-param-table th:first-child,
+  .updated-param-table td:first-child,
+  .updated-param-table th:nth-child(2),
+  .updated-param-table td:nth-child(2) {
+    width: auto;
+  }
+  .product-params-scroll {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+  .paper {
+    padding: 18px 14px;
+  }
+  .preview-card .paper {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 430px) {
+  html, body, #root {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+  .app-shell, .main, .workspace, .builder-grid, .left-col, .right-col, .card, .panel {
+    max-width: 100%;
+    min-width: 0;
+  }
+  .quick-row {
+    flex-wrap: wrap;
+  }
+  .quick.big { min-width: 0; flex: 1 1 120px; }
 }

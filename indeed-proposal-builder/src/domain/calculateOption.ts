@@ -357,8 +357,8 @@ function pricePamBase(
     });
   }
 
-  // Attach issues to first line bundle
-  if (results[0]) results[0].issues = [...issues, ...results[0].issues];
+  // Attach issues once (do not spread the same array reference twice)
+  if (results[0]) results[0].issues = [...issues];
   return results;
 }
 
@@ -883,6 +883,7 @@ export function calculateOptionSync(
   }
 
   const amount: Money | null = hasUnknown ? null : toMoney(knownSubtotal);
+  const uniqueIssues = dedupeIssues(allIssues);
 
   return {
     optionId: option.id,
@@ -898,12 +899,24 @@ export function calculateOptionSync(
       taxableGrossAmount: toMoney(taxableGross),
       includedTaxAmount: includedTax > 0 ? toMoney(includedTax) : taxableGross > 0 ? toMoney(includedTax) : null,
     },
-    issues: allIssues,
+    issues: uniqueIssues,
     provenance: {
       calculatorVersion: CALCULATOR_PROVENANCE.calculatorVersion,
       engineVersion: CALCULATOR_PROVENANCE.engineVersion,
       sourceHash: CALCULATOR_PROVENANCE.sourceHash,
     },
   };
+}
+
+function dedupeIssues(issues: ValidationIssue[]): ValidationIssue[] {
+  const seen = new Set<string>();
+  const out: ValidationIssue[] = [];
+  for (const issue of issues) {
+    const key = `${issue.code}|${issue.configurationId ?? ''}|${issue.optionId ?? ''}|${issue.message}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(issue);
+  }
+  return out;
 }
 

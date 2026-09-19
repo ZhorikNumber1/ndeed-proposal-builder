@@ -1,20 +1,58 @@
 import type { Content, TDocumentDefinitions, TableCell } from 'pdfmake/interfaces';
 import type { DocumentBlock, ExportService, ProposalDocument } from '../domain/types';
 
-async function getPdfMake() {
-  const pdfMakeMod = await import('pdfmake/build/pdfmake');
-  const vfsMod = await import('pdfmake/build/vfs_fonts');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const pdfMake = pdfMakeMod as any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const vfs = vfsMod as any;
-  const fontsVfs = vfs.pdfMake?.vfs ?? vfs.default?.pdfMake?.vfs ?? vfs.default ?? vfs;
-  pdfMake.vfs = fontsVfs;
-  return pdfMake as {
-    createPdf: (doc: TDocumentDefinitions) => {
-      getBlob: (cb: (blob: Blob) => void) => void;
-    };
+type PdfMakeInstance = {
+  virtualfs: {
+    writeFileSync: (filename: string, content: string | Uint8Array) => void;
   };
+  fonts: Record<string, { normal: string; bold: string; italics: string; bolditalics: string }>;
+  createPdf: (doc: TDocumentDefinitions) => {
+    getBlob: () => Promise<Blob>;
+  };
+};
+
+let pdfMakeReady: Promise<PdfMakeInstance> | null = null;
+
+function b64ToUint8Array(b64: string): Uint8Array {
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i += 1) out[i] = bin.charCodeAt(i);
+  return out;
+}
+
+async function getPdfMake(): Promise<PdfMakeInstance> {
+  if (!pdfMakeReady) {
+    pdfMakeReady = (async () => {
+      const pdfMakeMod = await import('pdfmake/build/pdfmake');
+      const vfsMod = await import('pdfmake/build/vfs_fonts');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const pdfMake = ((pdfMakeMod as any).default ?? pdfMakeMod) as PdfMakeInstance;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const fontsRaw = (vfsMod as any).default ?? vfsMod;
+      const fontEntries = Object.entries(fontsRaw as Record<string, string>).filter(
+        ([name, data]) => typeof name === 'string' && name.endsWith('.ttf') && typeof data === 'string',
+      );
+      if (!fontEntries.length) {
+        throw new Error('pdfmake vfs_fonts: Roboto TTF entries not found');
+      }
+      for (const [name, data] of fontEntries) {
+        pdfMake.virtualfs.writeFileSync(name, b64ToUint8Array(data));
+      }
+      pdfMake.fonts = {
+        Roboto: {
+          normal: 'Roboto-Regular.ttf',
+          bold: 'Roboto-Medium.ttf',
+          italics: 'Roboto-Italic.ttf',
+          bolditalics: 'Roboto-MediumItalic.ttf',
+        },
+      };
+      if (typeof pdfMake.createPdf !== 'function') {
+        throw new Error('pdfMake.createPdf is not a function');
+      }
+      return pdfMake;
+    })();
+  }
+  return pdfMakeReady;
 }
 
 function blockToContent(block: DocumentBlock): Content[] {
@@ -140,13 +178,11 @@ export function createPdfExporter(): Pick<ExportService, 'toPdf'> {
         pageMargins: [40, 40, 40, 40],
       };
 
-      return new Promise((resolve, reject) => {
-        try {
-          pdfMake.createPdf(docDefinition).getBlob((blob) => resolve(blob));
-        } catch (e) {
-          reject(e);
-        }
-      });
+      const blob = await pdfMake.createPdf(docDefinition).getBlob();
+      if (!(blob instanceof Blob) || blob.size < 5) {
+        throw new Error('PDF export produced an empty file');
+      }
+      return blob;
     },
   };
 }

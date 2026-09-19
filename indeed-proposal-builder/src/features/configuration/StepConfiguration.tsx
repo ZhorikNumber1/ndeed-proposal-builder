@@ -203,13 +203,15 @@ export function StepConfiguration() {
               <div className="sum">{formatOptionTotal(o.id)}</div>
             </div>
           ))}
-          <div className="summary-row">
-            <div>НДС</div>
-            <div className="sum red">{vatSummary(state)}</div>
-          </div>
+          {state.proposal.options.map((o, idx) => (
+            <div className="summary-row" key={`vat-${o.id}`}>
+              <div>НДС · таблица {idx + 1}</div>
+              <div className="sum red">{vatSummaryForOption(o)}</div>
+            </div>
+          ))}
           <div className="summary-divider" />
           <div className="summary-text">Итоговые суммы в КП приводятся по каждой таблице отдельно.</div>
-          <div className="summary-text">ФСТЭК-комплект указывается отдельной строкой; НДС отражается в примечании.</div>
+          <div className="summary-text">ФСТЭК-комплект указывается отдельной строкой; НДС отражается в примечании. НДС не суммируется между альтернативами.</div>
           <div className="demo-calc-label">Демонстрационный расчёт · mode=demo</div>
         </div>
       </div>
@@ -256,17 +258,15 @@ export function StepConfiguration() {
   );
 }
 
-function vatSummary(state: ReturnType<typeof useBuilder>['state']): string {
+function vatSummaryForOption(option: ReturnType<typeof useBuilder>['state']['proposal']['options'][number]): string {
   let hasExempt = false;
   let hasKit = false;
   let kitVat = 0;
-  for (const o of state.proposal.options) {
-    for (const line of o.calculation?.items ?? []) {
-      if (line.tax.mode === 'exempt') hasExempt = true;
-      if (line.itemId === 'PAM.FSTEC_KIT') {
-        hasKit = true;
-        kitVat += Number(line.tax.amount ?? 0);
-      }
+  for (const line of option.calculation?.items ?? []) {
+    if (line.tax.mode === 'exempt') hasExempt = true;
+    if (line.itemId === 'PAM.FSTEC_KIT') {
+      hasKit = true;
+      kitVat += Number(line.tax.amount ?? 0);
     }
   }
   if (hasKit && hasExempt) return `лицензии без НДС; комплект — НДС в т.ч. ${formatMoney(kitVat)}`;

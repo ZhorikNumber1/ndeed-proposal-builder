@@ -1,0 +1,53 @@
+=== typecheck ===
+
+> indeed-proposal-builder@1.0.0 typecheck
+> tsc -b --pretty false
+
+EXIT:0
+=== test ===
+
+> indeed-proposal-builder@1.0.0 test
+> vitest run
+
+
+ RUN  v5.0.1 /workspace/indeed-proposal-builder
+
+
+ Test Files  2 passed (2)
+      Tests  26 passed (26)
+   Start at  18:09:01
+   Duration  857ms (environment 60%, transform 21%, setup 8%, import 5%, tests 4%, worker 2%)
+
+EXIT:0
+=== lint ===
+
+> indeed-proposal-builder@1.0.0 lint
+> oxlint src
+
+src/app/BuilderProvider.tsx:193:17: warning react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+src/app/BuilderProvider.tsx:199:17: warning react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+src/app/BuilderProvider.tsx:206:17: warning react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+src/app/BuilderProvider.tsx:210:17: warning react(only-export-components): Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+EXIT:0
+=== e2e ===
+
+> indeed-proposal-builder@1.0.0 test:e2e
+> playwright test
+
+
+Running 3 tests using 2 workers
+
+(node:18664) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:18665) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:18665) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:18664) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › e2e/smoke.spec.ts:3:1 › smoke: shell, edit, parse, save (869ms)
+  ✓  2 [chromium] › e2e/export-fixes.spec.ts:7:3 › export freshness and PDF › qty change is reflected in DOCX; PDF downloads as real PDF (1.3s)
+  ✓  3 [chromium] › e2e/export-fixes.spec.ts:70:3 › export freshness and PDF › collapsed sidebar is ~76px; 390px has no page scroll (559ms)
+
+  3 passed (2.4s)
+EXIT:0

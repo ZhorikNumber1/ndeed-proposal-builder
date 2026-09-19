@@ -17,10 +17,24 @@ import {
 import { localDraftRepository, loadSidebarCollapsed, saveSidebarCollapsed } from '../services/localDraftRepository';
 import { validateProposal, collectBlockingIssues } from '../domain/validateProposal';
 import { buildProposalDocument, describeStructure } from '../domain/buildProposalDocument';
+import { calculateOptionSync } from '../domain/calculateOption';
 import { formatMoney } from '../domain/money';
 import { formatDateRu } from '../domain/dates';
 import { exportService } from '../services/pdfExporter';
 import { saveAs } from 'file-saver';
+import type { Proposal } from '../domain/types';
+
+/** Build export document from a synchronous snapshot — never from a stale React closure after dispatch. */
+function proposalForExport(proposal: Proposal, revision: number): Proposal {
+  return {
+    ...proposal,
+    options: proposal.options.map((option) => ({
+      ...option,
+      calculation: calculateOptionSync(option, revision),
+    })),
+    updatedAt: new Date().toISOString(),
+  };
+}
 
 interface BuilderContextValue {
   state: BuilderState;
@@ -45,6 +59,11 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
     return initial;
   });
   const hydratedRef = useRef(false);
+  const stateRef = useRef(state);
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   useEffect(() => {
     let cancelled = false;
@@ -81,14 +100,15 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
 
   const saveDraft = useCallback(async () => {
     try {
+      const snap = stateRef.current;
       await localDraftRepository.save({
         schemaVersion: 1,
         savedAt: new Date().toISOString(),
-        proposal: state.proposal,
+        proposal: snap.proposal,
         ui: {
-          activeStep: state.ui.activeStep,
-          activeOptionId: state.ui.activeOptionId,
-          sidebarCollapsed: state.ui.sidebarCollapsed,
+          activeStep: snap.ui.activeStep,
+          activeOptionId: snap.ui.activeOptionId,
+          sidebarCollapsed: snap.ui.sidebarCollapsed,
         },
       });
       dispatch({ type: 'MARK_CLEAN' });
@@ -99,14 +119,16 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
         message: e instanceof Error ? e.message : 'Ошибка сохранения',
       });
     }
-  }, [state]);
+  }, []);
 
   const exportDocx = useCallback(async () => {
     dispatch({ type: 'SET_EXPORT_PENDING', kind: 'docx' });
     try {
-      // Ensure calculation fingerprint matches current options
+      const snap = stateRef.current;
+      const revision = snap.revision + 1;
+      const proposal = proposalForExport(snap.proposal, revision);
       dispatch({ type: 'RECALCULATE_ALL' });
-      const doc = buildProposalDocument(state.proposal);
+      const doc = buildProposalDocument(proposal);
       const blob = await exportService.toDocx(doc);
       saveAs(blob, `${doc.fileBaseName}.docx`);
       dispatch({ type: 'SET_TOAST', message: 'DOCX (демонстрационный черновик) скачан' });
@@ -115,13 +137,16 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
     } finally {
       dispatch({ type: 'SET_EXPORT_PENDING', kind: null });
     }
-  }, [state.proposal]);
+  }, []);
 
   const exportPdf = useCallback(async () => {
     dispatch({ type: 'SET_EXPORT_PENDING', kind: 'pdf' });
     try {
+      const snap = stateRef.current;
+      const revision = snap.revision + 1;
+      const proposal = proposalForExport(snap.proposal, revision);
       dispatch({ type: 'RECALCULATE_ALL' });
-      const doc = buildProposalDocument(state.proposal);
+      const doc = buildProposalDocument(proposal);
       const blob = await exportService.toPdf(doc);
       saveAs(blob, `${doc.fileBaseName}.pdf`);
       dispatch({ type: 'SET_TOAST', message: 'PDF (демонстрационный черновик) скачан' });
@@ -130,7 +155,7 @@ export function BuilderProvider({ children }: { children: ReactNode }) {
     } finally {
       dispatch({ type: 'SET_EXPORT_PENDING', kind: null });
     }
-  }, [state.proposal]);
+  }, []);
 
   const formatOptionTotal = useCallback(
     (optionId: string) => {
