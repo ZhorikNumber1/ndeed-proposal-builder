@@ -1,0 +1,16 @@
+{
+  "sidebarW": 224,
+  "topbarH": 58,
+  "rightW": 520,
+  "previewW": 520,
+  "summaryW": 305,
+  "red": "#e30613",
+  "bg": "#f7f8fb",
+  "sums": [
+    "3 782 150,00 ₽",
+    "7 093 250,00 ₽",
+    "лицензии без НДС; комплект — НДС в т.ч. 1 100,00 ₽"
+  ],
+  "bodyScroll": false,
+  "appClass": "app-shell drawer-open"
+}

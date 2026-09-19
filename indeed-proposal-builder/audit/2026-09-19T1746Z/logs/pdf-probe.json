@@ -1,0 +1,10 @@
+{
+  "toast": "pdfMake.createPdf is not a function",
+  "pdfProbe": {
+    "imported": true,
+    "keys": [
+      "createPdfExporter",
+      "exportService"
+    ]
+  }
+}

@@ -1,0 +1,101 @@
+=== Independent oracle vs control table ===
+OK oracle PAM UL 25 year FSTEC: got 3779100 expected 3779100
+OK oracle PAM UL 25 perp FSTEC: got 7090200 expected 7090200
+OK oracle PAM UL 46 year ordinary: got 5183096 expected 5183096
+OK oracle PAM UL 46 year FSTEC: got 6737988 expected 6737988
+OK oracle PAM UL 77 year ordinary: got 7898968 expected 7898968
+OK oracle PAM UL 77 year FSTEC: got 10268643 expected 10268643
+OK oracle PAM UL 60 year ordinary: got 6665940 expected 6665940
+OK oracle PAM CS 10 year ordinary: got 3488380 expected 3488380
+OK oracle PAM CS 10 perp ordinary: got 6544800 expected 6544800
+
+=== SUT calculator vs control table ===
+OK SUT PAM UL 25 year FSTEC: lic=3779100.00 kit=3050.00 total=3782150.00 saleQty=1 pkg=25 sku=null
+OK SUT PAM UL 25 perp FSTEC: lic=7090200.00 kit=3050.00 total=7093250.00 saleQty=1 pkg=25 sku=null
+OK SUT PAM UL 46 year ordinary: lic=5183096.00 kit=0 total=5183096.00 saleQty=1 pkg=46 sku=null
+OK SUT PAM UL 46 year FSTEC: lic=6737988.00 kit=3050.00 total=6741038.00 saleQty=1 pkg=46 sku=null
+OK SUT PAM UL 77 year ordinary: lic=7898968.00 kit=0 total=7898968.00 saleQty=1 pkg=77 sku=null
+OK SUT PAM UL 77 year FSTEC: lic=10268643.00 kit=3050.00 total=10271693.00 saleQty=1 pkg=77 sku=null
+OK SUT PAM UL 60 year ordinary: lic=6665940.00 kit=0 total=6665940.00 saleQty=1 pkg=60 sku=PAM-01120060
+OK SUT PAM CS 10 year ordinary: lic=3488380.00 kit=0 total=3488380.00 saleQty=1 pkg=10 sku=PAM-02120010
+OK SUT PAM CS 10 perp ordinary: lic=6544800.00 kit=0 total=6544800.00 saleQty=1 pkg=10 sku=PAM-02000010
+
+=== Boundaries UL 29/30/31 59/60/61 CS 9/10/11 ===
+OK UL29: sut=3372120 oracle=3372120
+OK UL30: sut=3488400 oracle=3488400
+OK UL31: sut=3594326 oracle=3594326
+OK UL59: sut=6560033 oracle=6560033
+OK UL60: sut=6665940 oracle=6665940
+OK UL61: sut=6738487 oracle=6738487
+OK CS9: sut=3139542 oracle=3139542
+OK CS10: sut=3488380 oracle=3488380
+OK CS11: sut=3803833 oracle=3803833
+
+=== certified=null ===
+status=needs_rule amount=null issues=certification_unspecified,certification_unspecified
+lineTotal=null
+
+=== kit 2 + discount 15% ===
+lic=3212235.00 kit=6100.00 vat=1100.00 total=3218335.00
+kit_expected_6100=true vat_expected_1100=true
+
+=== ordinary + kit1 ===
+issues=kit_without_cert,kit_without_cert
+
+=== term 6 months ===
+status=needs_rule amount=null issues=term_needs_rule,term_needs_rule
+
+=== SKU lookups ===
+SKU PAM.UL q=60 cert=false -> PAM-01120060 (observed_exact)
+SKU PAM.UL q=46 cert=false -> null (unresolved)
+SKU PAM.UL q=25 cert=true -> null (unresolved)
+SKU PAM.CS q=10 cert=false -> PAM-02120010 (observed_exact)
+SKU PAM.FSTEC_KIT q=null cert=true -> null (unresolved)
+
+=== Parser battery ===
+PARSE "PAM25 FSTEC" => product=PAM qty=25 metric=users cert=true kit=1 modules= term=null conflicts=0 unk=PAM25 q=Для PAM без явной метрики предложен UL — при необходимости смените на CS/RL;Метрику PAM можно изменить
+PARSE "PAM 46 FSTEC" => product=PAM qty=46 metric=users cert=true kit=1 modules= term=null conflicts=0 unk= q=Для PAM без явной метрики предложен UL — при необходимости смените на CS/RL;Метрику PAM можно изменить
+PARSE "PAM ФСТЭК на 77 пользователей" => product=PAM qty=77 metric=users cert=true kit=1 modules= term=null conflicts=0 unk=на|ей q=
+PARSE "PAM 10 CS" => product=PAM qty=10 metric=concurrent_sessions cert=null kit=0 modules= term=null conflicts=0 unk= q=
+PARSE "PAM 46 без ФСТЭК" => product=PAM qty=46 metric=users cert=false kit=0 modules= term=null conflicts=0 unk= q=Для PAM без явной метрики предложен UL — при необходимости смените на CS/RL;Метрику PAM можно изменить
+PARSE "PAM 46 не ФСТЭК" => product=PAM qty=46 metric=users cert=false kit=0 modules= term=null conflicts=0 unk= q=Для PAM без явной метрики предложен UL — при необходимости смените на CS/RL;Метрику PAM можно изменить
+PARSE "PAM 46 обычная версия" => product=PAM qty=46 metric=users cert=false kit=0 modules= term=null conflicts=0 unk= q=Для PAM без явной метрики предложен UL — при необходимости смените на CS/RL;Метрику PAM можно изменить
+PARSE "PAM 46 77" => product=PAM qty=undefined metric=users cert=null kit=0 modules= term=null conflicts=1 unk= q=
+PARSE "PAM на 46 пользователей на 12 месяцев" => product=PAM qty=46 metric=users cert=null kit=0 modules= term=12 conflicts=0 unk=на|ей|на q=
+PARSE "PAM на 46 пользователей на 6 месяцев" => product=PAM qty=46 metric=users cert=null kit=0 modules= term=6 conflicts=0 unk=на|ей|на q=
+PARSE "AM WL LDAP 437" => product=AM qty=437 metric=users cert=null kit=0 modules=AM.WINDOWS_LOGON|AM.LDAP_PROXY term=null conflicts=0 unk= q=Количество модулей подставлено из базы — измените при необходимости
+PARSE "AM WL RDP LDAP SSO 150" => product=AM qty=150 metric=users cert=null kit=0 modules=AM.WINDOWS_LOGON|AM.RDP_LOGON|AM.LDAP_PROXY|AM.ESSO term=null conflicts=0 unk= q=Количество модулей подставлено из базы — измените при необходимости
+PARSE "AM NPS RADIUS 150" => product=AM qty=150 metric=users cert=null kit=0 modules=AM.NPS_RADIUS term=null conflicts=0 unk= q=Количество модулей подставлено из базы — измените при необходимости
+PARSE "AM FreeRADIUS 150" => product=AM qty=150 metric=users cert=null kit=0 modules=AM.FREERADIUS term=null conflicts=0 unk= q=Количество модулей подставлено из базы — измените при необходимости
+PARSE "CM agent 350" => product=CM qty=350 metric=users cert=null kit=0 modules=CM.WINDOWS.AGENT term=null conflicts=0 unk= q=Платформа CM требует уточнения (Windows / Мультиплатформа);Количество модулей подставлено из базы — измените при необходимости
+PARSE "ITDR Monitoring MFA 300" => product=ITDR qty=300 metric=licensed_units cert=null kit=0 modules=ITDR.MFA|ITDR.MONITORING term=null conflicts=0 unk= q=Количество модулей подставлено из базы — измените при необходимости
+PARSE "AAPM 50" => product=undefined qty=undefined metric=undefined cert=undefined kit=undefined modules= term=null conflicts=0 unk= q=Модуль AAPM распознан; базовая конфигурация PAM ещё не задана
+PARSE "PAM 46 неизвестнаяОпция" => product=PAM qty=46 metric=users cert=null kit=0 modules= term=null conflicts=0 unk=неизвестнаяОпция q=Для PAM без явной метрики предложен UL — при необходимости смените на CS/RL;Метрику PAM можно изменить
+
+=== ITDR / CM fixtures ===
+ITDR annual total=2970600.00 expected=2970600.00 match=true
+ITDR perp total=5572500.00 expected=5572500.00 match=true
+CM annual total=793327.50 expected=793327.50 match=true
+CM perp total=1487640.00 expected=1487640.00 match=true
+
+=== Demo proposal independence ===
+ids_differ=true
+copy_independent=true
+sub_total=3782150.00
+perp_total=7093250.00
+
+=== Empty / new proposal ===
+customer="" number="" configs0=0
+
+=== Document + DOCX/PDF exports ===
+blocks=22 unresolved=3 braces=false ellipsis=false
+unresolved_sample=Артикул не уточнён: Неисключительные права на Программу для ЭВМ Indeed Privileged Access Manager (пакет на 46 пользователей) на 1 (один) год | Артикул не уточнён: Сертифицированный ФСТЭК комплект Indeed Privileged Access Manager | Артикул не уточнён: Неисключительные права на Программу для ЭВМ Indeed Privileged Access Manager (пакет на 46 пользователей)
+demoBanner=true
+tables=2
+docx_bytes=11579 isZip=true
+pdf_error=Cannot redefine property: vfs
+multi_docx=13204 unresolved=2 wl_null=true
+multi_status=partial amount=null
+multi_pdf_error=Cannot redefine property: vfs
+partial unresolved has sku note=true
+partial sku=null

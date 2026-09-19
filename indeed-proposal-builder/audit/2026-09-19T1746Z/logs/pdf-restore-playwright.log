@@ -1,0 +1,29 @@
+
+Running 1 test using 1 worker
+
+(node:15086) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:15086) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [chromium] › e2e/audit-pdf-restore.spec.ts:7:1 › pdf download and draft restore (1.0m)
+
+
+  1) [chromium] › e2e/audit-pdf-restore.spec.ts:7:1 › pdf download and draft restore ───────────────
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.click: Target page, context or browser has been closed
+
+      36 |
+      37 |   // Draft restore integrity
+    > 38 |   await page.getByRole('button', { name: /Изменить/ }).click();
+         |                                                        ^
+      39 |   await page.getByLabel('Наименование заказчика').fill('ООО Тест аудита Restore');
+      40 |   await page.getByLabel('Номер КП').fill('КП-RESTORE-1');
+      41 |   await page.getByLabel('Дата КП').fill('2026-06-15');
+        at /workspace/indeed-proposal-builder/e2e/audit-pdf-restore.spec.ts:38:56
+
+    Error Context: test-results/audit-pdf-restore-pdf-download-and-draft-restore-chromium/error-context.md
+
+  1 failed
+    [chromium] › e2e/audit-pdf-restore.spec.ts:7:1 › pdf download and draft restore ────────────────
