@@ -9,13 +9,35 @@ import type {
   SkuLookup,
   SkuResolution,
 } from '../domain/types';
+import { resolveArticle } from './articleResolver';
 
 const skus = observedSkus as ObservedSku[];
 const items = calculatorMapping.items as CatalogItem[];
 
 export function resolveSkuSync(input: SkuLookup): SkuResolution {
-  if (input.itemId === 'PAM.FSTEC_KIT') {
-    return { sku: null, status: 'unresolved', labelExample: 'Сертифицированный ФСТЭК комплект Indeed Privileged Access Manager' };
+  const articleResult = resolveArticle({
+    itemId: input.itemId,
+    licenseType: input.licenseType,
+    termMonths: input.termMonths,
+    packageCapacity: input.packageCapacity,
+    certification: input.certified,
+    customerGroupId: 'standard',
+  });
+
+  if (articleResult.status === 'found' && articleResult.sku) {
+    return {
+      sku: articleResult.sku,
+      status: articleResult.skuStatus,
+      labelExample: articleResult.display?.name,
+    };
+  }
+
+  if (articleResult.status === 'ambiguous') {
+    return {
+      sku: null,
+      status: 'unresolved',
+      labelExample: articleResult.issues.join('; '),
+    };
   }
 
   const matches = skus.filter((s) => {
@@ -25,11 +47,9 @@ export function resolveSkuSync(input: SkuLookup): SkuResolution {
     if (s.packageCapacity != null || input.packageCapacity != null) {
       if (s.packageCapacity !== input.packageCapacity) return false;
     }
-    // certifiedEvidence true only matches certified=true; null is not a wildcard for certified
     if (input.certified === true) {
       if (s.certifiedEvidence !== true) return false;
     } else if (input.certified === false || input.certified === null) {
-      // ordinary / unspecified: allow null evidence, not certifiedEvidence=true
       if (s.certifiedEvidence === true) return false;
     }
     return true;
@@ -43,7 +63,6 @@ export function resolveSkuSync(input: SkuLookup): SkuResolution {
     };
   }
 
-  // Partial label from catalog
   const cat = items.find((i) => i.itemId === input.itemId);
   return {
     sku: null,

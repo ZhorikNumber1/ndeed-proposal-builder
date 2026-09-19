@@ -1,6 +1,7 @@
 {
   "catalogVersion": null,
   "source": null,
+  "importStatus": "missing_source",
   "entries": [],
-  "importStatus": "missing_source"
+  "specialExcludedByDefault": true
 }

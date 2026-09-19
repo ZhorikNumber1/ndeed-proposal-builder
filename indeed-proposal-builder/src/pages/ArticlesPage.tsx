@@ -2,26 +2,14 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { AppShell } from '../components/layout/AppShell';
 import importReport from '../data/articlesImportReport.json';
-
-interface CatalogEntry {
-  sku?: string;
-  label?: string;
-  product?: string;
-  [key: string]: unknown;
-}
-
-interface ArticlesCatalog {
-  catalogVersion: string | null;
-  source: string | null;
-  entries: CatalogEntry[];
-  importStatus: string;
-}
+import type { ArticleEntry, ArticlesCatalogFile, ArticlesImportReport } from '../domain/articleTypes';
 
 const PAGE_SIZE = 50;
+const report = importReport as ArticlesImportReport;
 
-async function loadCatalog(): Promise<ArticlesCatalog> {
+async function loadCatalog(): Promise<ArticlesCatalogFile> {
   const mod = await import('../data/articlesCatalog.json');
-  return mod.default as ArticlesCatalog;
+  return mod.default as ArticlesCatalogFile;
 }
 
 async function copyText(text: string): Promise<boolean> {
@@ -45,15 +33,22 @@ async function copyText(text: string): Promise<boolean> {
   }
 }
 
+function formatSource(entry: ArticleEntry): string {
+  return entry.sources.map((s) => `${s.sheet}!${s.cell}`).join(', ');
+}
+
 export function ArticlesPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [catalog, setCatalog] = useState<ArticlesCatalog | null>(null);
+  const [catalog, setCatalog] = useState<ArticlesCatalogFile | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [productFilter, setProductFilter] = useState('all');
+  const [kindFilter, setKindFilter] = useState('all');
+  const [certificationFilter, setCertificationFilter] = useState('all');
+  const [showSpecial, setShowSpecial] = useState(false);
   const [page, setPage] = useState(0);
-  const [selected, setSelected] = useState<CatalogEntry | null>(null);
+  const [selected, setSelected] = useState<ArticleEntry | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
@@ -71,16 +66,29 @@ export function ArticlesPage() {
 
   const isEmpty = !catalog || catalog.importStatus === 'missing_source' || catalog.entries.length === 0;
 
+  const kindOptions = useMemo(() => {
+    if (!catalog) return [];
+    const kinds = new Set(catalog.entries.map((e) => e.kind));
+    return [...kinds].sort();
+  }, [catalog]);
+
   const filtered = useMemo(() => {
     if (!catalog) return [];
     const q = search.trim().toLowerCase();
     return catalog.entries.filter((e) => {
+      if (!showSpecial && (e.excludedByDefault || e.kind === 'special' || e.kind === 'one_off')) {
+        return false;
+      }
       if (productFilter !== 'all' && e.product !== productFilter) return false;
+      if (kindFilter !== 'all' && e.kind !== kindFilter) return false;
+      if (certificationFilter === 'ordinary' && e.certification !== 'ordinary') return false;
+      if (certificationFilter === 'fstec' && e.certification !== 'fstec') return false;
+      if (certificationFilter === 'none' && e.certification != null) return false;
       if (!q) return true;
-      const hay = `${e.sku ?? ''} ${e.label ?? ''} ${e.product ?? ''}`.toLowerCase();
+      const hay = `${e.sku} ${e.name} ${e.product} ${e.itemId ?? ''} ${e.kind}`.toLowerCase();
       return hay.includes(q);
     });
-  }, [catalog, search, productFilter]);
+  }, [catalog, search, productFilter, kindFilter, certificationFilter, showSpecial]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const pageItems = filtered.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
@@ -95,6 +103,10 @@ export function ArticlesPage() {
     navigate(`/?useArticle=${encodeURIComponent(String(sku))}`);
   }, [navigate, selected, searchParams]);
 
+  const sourceLabel = catalog?.source
+    ? `${catalog.source.fileName} (${catalog.source.fileHash.slice(0, 8)}…)`
+    : '—';
+
   return (
     <AppShell title="Артикулы" activeNav="articles">
       <div className="page-content">
@@ -106,11 +118,11 @@ export function ArticlesPage() {
         <div className="page-card">
           <h2>Источник данных</h2>
           <p className="page-subtitle" style={{ margin: 0 }}>
-            Версия каталога: {catalog?.catalogVersion ?? '—'} · Файл: {catalog?.source ?? '—'} · Статус:{' '}
+            Версия каталога: {catalog?.catalogVersion ?? '—'} · Файл: {sourceLabel} · Статус:{' '}
             {catalog?.importStatus ?? 'загрузка…'}
           </p>
           <p className="page-subtitle" style={{ marginTop: 8 }}>
-            {importReport.message}
+            {report.message}
           </p>
         </div>
 
@@ -153,6 +165,43 @@ export function ArticlesPage() {
                 <option value="PAM">PAM</option>
                 <option value="ITDR">ITDR</option>
               </select>
+              <select
+                value={kindFilter}
+                onChange={(e) => {
+                  setKindFilter(e.target.value);
+                  setPage(0);
+                }}
+                aria-label="Фильтр по типу"
+              >
+                <option value="all">Все типы</option>
+                {kindOptions.map((kind) => (
+                  <option key={kind} value={kind}>{kind}</option>
+                ))}
+              </select>
+              <select
+                value={certificationFilter}
+                onChange={(e) => {
+                  setCertificationFilter(e.target.value);
+                  setPage(0);
+                }}
+                aria-label="Фильтр по сертификации"
+              >
+                <option value="all">Любая сертификация</option>
+                <option value="ordinary">Обычная</option>
+                <option value="fstec">ФСТЭК</option>
+                <option value="none">Без сертификации</option>
+              </select>
+              <label className="articles-toggle">
+                <input
+                  type="checkbox"
+                  checked={showSpecial}
+                  onChange={(e) => {
+                    setShowSpecial(e.target.checked);
+                    setPage(0);
+                  }}
+                />
+                Показать special / one-off
+              </label>
             </div>
 
             <div className="articles-table-wrap">
@@ -162,15 +211,17 @@ export function ArticlesPage() {
                     <th>SKU</th>
                     <th>Название</th>
                     <th>Продукт</th>
+                    <th>Тип</th>
                     <th />
                   </tr>
                 </thead>
                 <tbody>
-                  {pageItems.map((entry, idx) => (
-                    <tr key={`${entry.sku ?? idx}-${idx}`}>
-                      <td>{entry.sku ?? '—'}</td>
-                      <td>{entry.label ?? '—'}</td>
-                      <td>{entry.product ?? '—'}</td>
+                  {pageItems.map((entry) => (
+                    <tr key={entry.id}>
+                      <td>{entry.sku}</td>
+                      <td>{entry.name}</td>
+                      <td>{entry.product}</td>
+                      <td>{entry.kind}</td>
                       <td>
                         <button type="button" className="page-btn small" onClick={() => setSelected(entry)}>
                           Подробнее
@@ -215,28 +266,50 @@ export function ArticlesPage() {
             <h3>Артикул</h3>
             <div className="drawer-field">
               <label>SKU</label>
-              <div>{selected.sku ?? '—'}</div>
+              <div>{selected.sku}</div>
             </div>
             <div className="drawer-field">
               <label>Название</label>
-              <div>{selected.label ?? '—'}</div>
+              <div>{selected.name}</div>
             </div>
             <div className="drawer-field">
               <label>Продукт</label>
-              <div>{selected.product ?? '—'}</div>
+              <div>{selected.product}</div>
             </div>
+            <div className="drawer-field">
+              <label>Тип</label>
+              <div>{selected.kind}</div>
+            </div>
+            <div className="drawer-field">
+              <label>itemId</label>
+              <div>{selected.itemId ?? '—'}</div>
+            </div>
+            <div className="drawer-field">
+              <label>Источник (лист / ячейка)</label>
+              <div>{formatSource(selected)}</div>
+            </div>
+            {selected.issues.length > 0 ? (
+              <div className="drawer-field">
+                <label>Замечания</label>
+                <ul className="drawer-issues">
+                  {selected.issues.map((issue) => (
+                    <li key={issue}>{issue}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
             <div className="drawer-actions">
               <button
                 type="button"
                 className="page-btn small"
-                onClick={() => void handleCopy(String(selected.sku ?? ''))}
+                onClick={() => void handleCopy(selected.sku)}
               >
                 Копировать SKU
               </button>
               <button
                 type="button"
                 className="page-btn small"
-                onClick={() => void handleCopy(String(selected.label ?? ''))}
+                onClick={() => void handleCopy(selected.name)}
               >
                 Копировать название
               </button>

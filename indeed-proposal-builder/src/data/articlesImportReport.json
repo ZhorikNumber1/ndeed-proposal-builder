@@ -2,5 +2,11 @@
   "status": "missing_source",
   "message": "Файл Excel со справочником артикулов не найден. Импорт не выполнялся.",
   "importedAt": null,
-  "rowCount": 0
+  "rowCount": 0,
+  "fileName": null,
+  "fileHash": null,
+  "issues": [
+    "Expected file: reference/артикулы_09.04.2026 копия.xlsx",
+    "Also searched uploads/ and *артикул*.xlsx under workspace"
+  ]
 }

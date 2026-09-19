@@ -179,6 +179,24 @@
   background: var(--field);
 }
 
+.articles-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.drawer-issues {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
 .articles-table-wrap {
   overflow-x: auto;
   border: 1px solid var(--line);
