@@ -1,0 +1,92 @@
+id,area,requirement_or_scenario,status,category,priority,evidence_type,evidence,notes
+ENV-01,environment,Node/npm/lockfile install + project location,Проверено — работает,Ограничение среды проверки,,static+commands,logs/commands.log; package-lock.json,Node v22.14.0 npm 10.9.7; project /workspace/indeed-proposal-builder
+ENV-02,environment,Git commit and dirty state recorded,Проверено — работает,,,static,git bdce514; audit/ untracked after audit,Product src unchanged
+ENV-03,environment,cursor_frontend_prompt.md available,Не проверено,Ограничение среды проверки,,static,file missing,Scope from audit brief + README + reference/1.html
+ENV-04,environment,reference/1.html available,Проверено — работает,,,static,reference/1.html,Used for visual comparison
+QA-01,quality,npm run typecheck,Проверено — работает,,,commands,logs/commands.log EXIT:0,
+QA-02,quality,npm run lint,Проверено — работает,,,commands,logs/commands.log EXIT:0 + 4 oxlint warnings,P3-01
+QA-03,quality,npm run test (vitest),Проверено — работает,,,commands,logs/commands.log 23 passed,
+QA-04,quality,npm run build,Проверено — работает,,,commands,logs/commands.log EXIT:0; chunk size warnings,
+QA-05,quality,dev server http://127.0.0.1:43123,Проверено — работает,,,manual/browser,HTTP 200 during audit,
+UI-01,shell,4-step stepper navigation,Проверено — работает,,,browser,screenshots/01 07 08; e2e smoke,
+UI-02,shell,Sidebar 224px wide layout,Проверено — работает,,,browser,logs/layout-1792.json sidebarW=224,
+UI-03,shell,Collapsed sidebar ~76px,Проверено — ошибка,Ошибка реализации,P2,browser,screenshots/02; ui-assertions collapsedW≈196–215,Expected ~76
+UI-04,shell,Topbar ~58px,Проверено — работает,,,browser,layout-1792.json topbarH=58,
+UI-05,shell,Preview column ~520px at 1792,Проверено — работает,,,browser,layout-1792.json rightW/previewW=520,
+UI-06,shell,Brand colors #e30613 #f7f8fb,Проверено — работает,,,browser,layout-1792.json,
+UI-07,shell,Nav items outside scope disabled,Проверено — работает,Ограничение демо,,browser,6× .nav-item.soon,
+UI-08,responsive,1792×1024 step2 demo layout,Проверено — работает,,,browser,screenshots/01-step2-demo-1792x1024.png,Not pixel-perfect vs HTML height density
+UI-09,responsive,1440×900 no page horizontal scroll,Проверено — работает,,,browser,screenshots/09; layout-responsive.json scroll=false,
+UI-10,responsive,1280×800 usable,Реализовано частично,,,browser,screenshots/10-1280x800.png,Column reflow acceptable
+UI-11,responsive,390×844 no page horizontal scroll,Проверено — ошибка,Ошибка реализации,P2,browser,screenshots/11-390x844.png scroll=true,Mobile menu present
+STEP1-01,step1,Edit customer/number/date/manager,Проверено — работает,,,browser,screenshots/03; restore-result.json,
+STEP1-02,step1,Validity calendar month not 30 days,Проверено — работает,,,browser,restore-result validityLabel=1 месяц; draft-raw validity.kind=calendar_months,
+STEP1-03,step1,Date-only no timezone day shift,Проверено — работает,,,browser,issueDate 2026-06-15 → preview 15.06.2026,
+STEP1-04,step1,Edit meta via Изменить keeps configs,Проверено — работает,,,browser,screenshots/03 06,
+STEP1-05,step1,Empty required field validation + draft still savable,Реализовано частично,,,browser+static,partial UI coverage,Draft save confirmed; full empty-field UX not exhaustively logged
+STEP2-01,step2,Apply PAM 46 FSTEC,Проверено — работает,,,browser,screenshots/04-after-pam46-apply.png,
+STEP2-02,step2,Manual qty 77,Проверено — работает,,,browser,screenshots/05-qty-77.png,
+STEP2-03,step2,Switch UL/CS metric,Проверено — работает,,,browser+harness,ui flow + calculator CS fixtures,
+STEP2-04,step2,Add/remove module,Проверено — работает,,,browser+unit,domain independence tests,
+STEP2-05,step2,Second product / duplicate config independence,Проверено — работает,,,harness,audit-harness Demo proposal independence ids_differ copy_independent,
+STEP2-06,step2,Disable product excludes from output keeps values,Реализовано частично,,,static+unit,enabled flag in model,Full UI toggle path not separately screenshot-logged
+STEP2-07,step2,Separate module qty vs kit qty,Проверено — работает,,,harness,kit 2×3050 independent of license discount,
+STEP3-01,step3,Select year / perpetual / both alternatives,Проверено — работает,,,browser,screenshots/07-step3.png; demo totals both,
+STEP3-02,step3,Alternatives independent,Проверено — работает,,,harness,sub_total≠perp_total; copy_independent,
+STEP3-03,step3,Discount 15% and markup via negative signedDiscount,Проверено — работает,,,harness,kit 2 + discount 15%; CM +15% fixtures,
+STEP3-04,step3,Unsupported term 6 months → needs_rule not free,Проверено — работает,,,harness,term 6 months status=needs_rule amount=null,
+STEP3-05,step3,Unknown price / certified=null → needs_rule,Проверено — работает,,,harness,certified=null lineTotal=null,
+STEP3-06,step3,Do not sum year+perp into one purchase total,Проверено — работает,,,browser+static,separate option totals in UI,
+STEP4-01,step4,Fullscreen preview + Escape,Проверено — работает,,,browser,screenshots/08-fullscreen-preview.png,
+STEP4-02,step4,DOCX download real OOXML,Проверено — работает,,,export analysis,exports/audit-pam46-fstec.docx isZip tables=2,
+STEP4-03,step4,PDF download real PDF,Проверено — ошибка,Ошибка реализации,P1,browser+harness,pdf-probe.json toast; harness pdf_error Cannot redefine property: vfs,pdfExporter.ts getPdfMake
+STEP4-04,step4,New KP clears demo customer/prices,Проверено — работает,,,harness,Empty / new proposal customer="" configs0=0,
+CALC-01,calc,Control table PAM UL25 year FSTEC,Проверено — работает,,,harness,oracle+SUT 3782150,
+CALC-02,calc,Control table PAM UL25 perp FSTEC,Проверено — работает,,,harness,7093250,
+CALC-03,calc,Control table PAM UL46 year ordinary/FSTEC,Проверено — работает,,,harness,5183096 / 6741038,
+CALC-04,calc,Control table PAM UL77 year ordinary/FSTEC,Проверено — работает,,,harness,7898968 / 10271693,
+CALC-05,calc,Control table PAM UL60 / CS10,Проверено — работает,,,harness,6665940; CS10 year/perp,
+CALC-06,calc,Control ITDR Mon+MFA 300,Проверено — работает,,,harness,2970600 / 5572500,
+CALC-07,calc,Control CM Windows+Agent 350 +15%,Проверено — работает,,,harness,793327.50 / 1487640.00,
+CALC-08,calc,Tier boundaries UL29/30/31 59/60/61 CS9/10/11,Проверено — работает,,,harness,all OK vs independent oracle,
+CALC-09,calc,PAM saleQuantity=1 package pricing,Проверено — работает,,,harness,saleQty=1 pkg=N,
+CALC-10,calc,Kit VAT 550/1100; discount not on kit,Проверено — работает,,,harness,kit 2 vat=1100 lic discounted,
+CALC-11,calc,Ordinary+kit inconsistency issue,Проверено — работает,,,harness,kit_without_cert (duplicated),
+CALC-12,calc,UI kit VAT not summed across alternatives,Проверено — ошибка,Ошибка реализации,P1,browser,layout-1792 sums[2] 1 100 ₽; StepConfiguration.tsx vatSummary,Should be per-alternative 550
+PARSER-01,parser,PAM25 FSTEC compact,Реализовано частично,Ошибка реализации,P2,harness,qty=25 cert=true unk=PAM25,Leftover token
+PARSER-02,parser,PAM 46 FSTEC,Проверено — работает,,,harness,qty=46 cert=true unk empty,
+PARSER-03,parser,PAM ФСТЭК на 77 пользователей,Реализовано частично,Ошибка реализации,P2,harness,qty=77 cert=true unk=на|ей,
+PARSER-04,parser,PAM 10 CS metric,Проверено — работает,,,harness,metric=concurrent_sessions,
+PARSER-05,parser,Negation без/не ФСТЭК / обычная,Проверено — работает,,,harness,cert=false kit=0,
+PARSER-06,parser,PAM 46 77 ambiguity conflict,Проверено — работает,,,harness,conflicts=1 qty=undefined,
+PARSER-07,parser,12 months not mistaken for users,Проверено — работает,,,harness,qty=46 term=12,
+PARSER-08,parser,6 months term parsed,Проверено — работает,,,harness,term=6 (calc needs_rule),
+PARSER-09,parser,AM NPS vs FreeRADIUS distinct,Проверено — работает,,,harness,AM.NPS_RADIUS vs AM.FREERADIUS,
+PARSER-10,parser,CM agent platform clarification,Проверено — работает,,,harness,platform clarification question,
+PARSER-11,parser,AAPM without PAM base incomplete,Проверено — работает,,,harness,product undefined; AAPM note,
+PARSER-12,parser,Unknown token preserved,Проверено — работает,,,harness,unk=неизвестнаяОпция,
+CAT-01,catalog,SKU PAM-01120060 UL60 year,Проверено — работает,,,harness,observed_exact,
+CAT-02,catalog,SKU PAM-02120010 / PAM-02000010 CS10,Проверено — работает,,,harness,observed_exact,
+CAT-03,catalog,No invented SKU for PAM46/77/kit,Проверено — работает,,,harness,sku=null unresolved,
+CAT-04,catalog,content blocks 35 / catalog items,Проверено — работает,,,static,JSON counts 35 blocks,
+DOC-01,document,Shared model preview+export,Проверено — работает,,,static+harness,buildProposalDocument used by preview and exporters,
+DOC-02,document,No {{vars}} undefined ellipsis in demo export,Проверено — работает,,,harness,braces=false ellipsis=false,
+DOC-03,document,Demo banner in UI and DOCX,Проверено — работает,,,harness+browser,demoBanner=true,
+DOC-04,document,Manager not auto legal signatory,Проверено — работает,,,static+preview,manager as contact fields,
+DOC-05,document,FSTEC kit block only with kit,Проверено — работает,,,unit+harness,kit notes gated,
+EXPORT-01,export,DOCX PAM46 FSTEC dual alternatives,Проверено — работает,,,export analysis,exports/audit-pam46-fstec.docx,
+EXPORT-02,export,DOCX multi-product partial,Проверено — работает,,,export analysis,exports/audit-multi-product.docx multi_status=partial,
+EXPORT-03,export,DOCX incomplete unknown SKU,Проверено — работает,,,export analysis,exports/audit-partial-sku.docx,
+EXPORT-04,export,Export uses fresh state after qty change,Проверено — ошибка,Ошибка реализации,P1,code+artifact,BuilderProvider exportDocx stale closure; browser-DEMO_draft.docx vs screenshot 06,Risk of stale DOCX
+EXPORT-05,export,PDF Cyrillic / multi-page,Не проверено,Ограничение среды проверки,,blocked by P1-01,No PDF file produced,
+STORE-01,storage,localStorage save/restore roundtrip,Проверено — работает,,,browser,draft-raw.json; restore-result.json,
+STORE-02,storage,Corrupt JSON / unsupported schemaVersion,Реализовано частично,,,static,schemaVersion field present,Explicit corrupt/unsupported UI paths not fully exercised in logs
+STORE-03,storage,localStorage origin-local limitation disclosed,Проверено — работает,Ограничение демо,,README+UI demo banner,
+SEC-01,security,Customer HTML shown as text not executed,Проверено — работает,,,static,no dangerouslySetInnerHTML in src,
+SEC-02,security,No customer data to external APIs,Проверено — работает,,,browser,console empty; mode=demo local,
+A11Y-01,a11y,Keyboard / focus / Escape modal,Реализовано частично,,,browser,Escape fullscreen OK; full a11y pass not exhaustive,
+SCOPE-01,scope,Backend/Excel/auth not required,Вне scope,Ограничение демо,,,Honestly limited; service interfaces present
+SCOPE-02,scope,Shell pages My KP/Products/etc,Вне scope,Ограничение демо,,UI disabled soon items,
+READY-01,readiness,Frontend demo suitability,Реализовано частично,,,synthesis,AUDIT.md §1,OK except PDF + VAT UX + stale export risk
+READY-02,readiness,Backend integration readiness,Реализовано частично,,,static,mode demo|api service seams,
+READY-03,readiness,Real client KP issuance,Не реализовано,Неустановленное бизнес-правило,,,No approved release mode/SKU/pricing authority
