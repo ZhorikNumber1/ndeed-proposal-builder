@@ -1,0 +1,619 @@
+[
+  {
+    "sku": "AM-12000001",
+    "itemId": "AM.BASE",
+    "licenseType": "subscription",
+    "termMonths": 12,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на программу для ЭВМ Indeed Access Manager сроком на 1 (один) год",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t2.r2"
+      },
+      {
+        "sourceId": "S07",
+        "locator": "t2.r2"
+      }
+    ]
+  },
+  {
+    "sku": "AM-12000006",
+    "itemId": "AM.WINDOWS_LOGON",
+    "licenseType": "subscription",
+    "termMonths": 12,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности  модуль Windows Logon для программы для ЭВМ Indeed Access Manager сроком на 1 (один) год",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t2.r3"
+      },
+      {
+        "sourceId": "S07",
+        "locator": "t2.r4"
+      }
+    ]
+  },
+  {
+    "sku": "AM-12000027",
+    "itemId": "AM.LINUX_LOGON",
+    "licenseType": "subscription",
+    "termMonths": 12,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности Модуль Linux Logon для программы для ЭВМ Indeed Access Manager сроком на 1 (один) год",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t2.r4"
+      },
+      {
+        "sourceId": "S07",
+        "locator": "t2.r5"
+      }
+    ]
+  },
+  {
+    "sku": "AM-12000002",
+    "itemId": "AM.ADFS",
+    "licenseType": "subscription",
+    "termMonths": 12,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности модуль ADFS Extension для программы для ЭВМ Indeed Access Manager сроком на 1 (один) год",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t2.r5"
+      }
+    ]
+  },
+  {
+    "sku": "AM-12000003",
+    "itemId": "AM.ESSO",
+    "licenseType": "subscription",
+    "termMonths": 12,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности модуль Enterprise Single Sign-On для программы для ЭВМ Indeed Access Manager  сроком на 1 (один) год",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t2.r6"
+      }
+    ]
+  },
+  {
+    "sku": "AM-12000004",
+    "itemId": "AM.IIS",
+    "licenseType": "subscription",
+    "termMonths": 12,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности модуль IIS Extension для программы для ЭВМ Indeed Access Manager сроком на 1 (один) год",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t2.r7"
+      }
+    ]
+  },
+  {
+    "sku": "AM-12000005",
+    "itemId": "AM.NPS_RADIUS",
+    "licenseType": "subscription",
+    "termMonths": 12,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности модуль NPS RADIUS Extension для программы для ЭВМ Indeed Access Manager сроком на 1 (один) год",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t2.r8"
+      },
+      {
+        "sourceId": "S07",
+        "locator": "t2.r3"
+      }
+    ]
+  },
+  {
+    "sku": "AM-12000007",
+    "itemId": "AM.RDP_LOGON",
+    "licenseType": "subscription",
+    "termMonths": 12,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности  модуль RDP Windows Logon для программы для ЭВМ Indeed Access Manager сроком на 1 (один) год",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t2.r9"
+      }
+    ]
+  },
+  {
+    "sku": "AM-12000008",
+    "itemId": "AM.IDP",
+    "licenseType": "subscription",
+    "termMonths": 12,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности модуль Indeed AM Identity Provider для программы для ЭВМ Indeed Access Manager сроком на 1 (один) год",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t2.r10"
+      }
+    ]
+  },
+  {
+    "sku": "AM-12000023",
+    "itemId": "AM.MDP",
+    "licenseType": "subscription",
+    "termMonths": 12,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности Модуль Mobile Device Provisioning для программы для ЭВМ Indeed Access Manager сроком на 1 (один) год",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t2.r11"
+      }
+    ]
+  },
+  {
+    "sku": "AM-12000016",
+    "itemId": "AM.API",
+    "licenseType": "subscription",
+    "termMonths": 12,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности модуль API для программы для ЭВМ Indeed Access Manager сроком на 1 (один) год",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t2.r12"
+      }
+    ]
+  },
+  {
+    "sku": "AM-12000025",
+    "itemId": "AM.FREERADIUS",
+    "licenseType": "subscription",
+    "termMonths": 12,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности Модуль Free Radius Extension  для программы для ЭВМ Indeed Access Manager сроком на 1 (один) год",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t2.r13"
+      }
+    ]
+  },
+  {
+    "sku": "AM-12000026",
+    "itemId": "AM.LDAP_PROXY",
+    "licenseType": "subscription",
+    "termMonths": 12,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности Модуль LDAP Proxy для программы для ЭВМ Indeed Access Manager сроком на 1 (один) год",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t2.r14"
+      }
+    ]
+  },
+  {
+    "sku": "AM-00000001",
+    "itemId": "AM.BASE",
+    "licenseType": "perpetual",
+    "termMonths": null,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на программу для ЭВМ Indeed Access Manager",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t3.r2"
+      },
+      {
+        "sourceId": "S07",
+        "locator": "t3.r2"
+      }
+    ]
+  },
+  {
+    "sku": "AM-00000006",
+    "itemId": "AM.WINDOWS_LOGON",
+    "licenseType": "perpetual",
+    "termMonths": null,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности  модуль Windows Logon для программы для ЭВМ Indeed Access Manager",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t3.r3"
+      },
+      {
+        "sourceId": "S07",
+        "locator": "t3.r4"
+      }
+    ]
+  },
+  {
+    "sku": "AM-00000027",
+    "itemId": "AM.LINUX_LOGON",
+    "licenseType": "perpetual",
+    "termMonths": null,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности Модуль Linux Logon для программы для ЭВМ Indeed Access Manager",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t3.r4"
+      },
+      {
+        "sourceId": "S07",
+        "locator": "t3.r5"
+      }
+    ]
+  },
+  {
+    "sku": "AM-00000002",
+    "itemId": "AM.ADFS",
+    "licenseType": "perpetual",
+    "termMonths": null,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности модуль ADFS Extension для программы для ЭВМ Indeed Access Manager",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t3.r5"
+      }
+    ]
+  },
+  {
+    "sku": "AM-00000003",
+    "itemId": "AM.ESSO",
+    "licenseType": "perpetual",
+    "termMonths": null,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности модуль Enterprise Single Sign-On для программы для ЭВМ Indeed Access Manager",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t3.r6"
+      }
+    ]
+  },
+  {
+    "sku": "AM-00000004",
+    "itemId": "AM.IIS",
+    "licenseType": "perpetual",
+    "termMonths": null,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности модуль IIS Extension для программы для ЭВМ Indeed Access Manager",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t3.r7"
+      }
+    ]
+  },
+  {
+    "sku": "AM-00000005",
+    "itemId": "AM.NPS_RADIUS",
+    "licenseType": "perpetual",
+    "termMonths": null,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности модуль NPS RADIUS Extension для программы для ЭВМ Indeed Access Manager",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t3.r8"
+      },
+      {
+        "sourceId": "S07",
+        "locator": "t3.r3"
+      }
+    ]
+  },
+  {
+    "sku": "AM-00000007",
+    "itemId": "AM.RDP_LOGON",
+    "licenseType": "perpetual",
+    "termMonths": null,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности  модуль RDP Windows Logon для программы для ЭВМ Indeed Access Manager",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t3.r9"
+      }
+    ]
+  },
+  {
+    "sku": "AM-00000008",
+    "itemId": "AM.IDP",
+    "licenseType": "perpetual",
+    "termMonths": null,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности модуль Indeed AM Identity Provider для программы для ЭВМ Indeed Access Manager",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t3.r10"
+      }
+    ]
+  },
+  {
+    "sku": "AM-00000023",
+    "itemId": "AM.MDP",
+    "licenseType": "perpetual",
+    "termMonths": null,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности Модуль Mobile Device Provisioning для программы для ЭВМ Indeed Access Manager",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t3.r11"
+      }
+    ]
+  },
+  {
+    "sku": "AM-00000016",
+    "itemId": "AM.API",
+    "licenseType": "perpetual",
+    "termMonths": null,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности модуль API для программы для ЭВМ Indeed Access Manager",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t3.r12"
+      }
+    ]
+  },
+  {
+    "sku": "AM-00000025",
+    "itemId": "AM.FREERADIUS",
+    "licenseType": "perpetual",
+    "termMonths": null,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности Модуль Free Radius Extension  для программы для ЭВМ Indeed Access Manager",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t3.r13"
+      }
+    ]
+  },
+  {
+    "sku": "AM-00000026",
+    "itemId": "AM.LDAP_PROXY",
+    "licenseType": "perpetual",
+    "termMonths": null,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности Модуль LDAP Proxy для программы для ЭВМ Indeed Access Manager",
+    "sources": [
+      {
+        "sourceId": "S01",
+        "locator": "t3.r14"
+      }
+    ]
+  },
+  {
+    "sku": "ITDR01120001",
+    "itemId": "ITDR.MONITORING",
+    "licenseType": "subscription",
+    "termMonths": 12,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на ПО Indeed ITDR Monitoring 1 (один) год",
+    "sources": [
+      {
+        "sourceId": "S02",
+        "locator": "t2.r2"
+      }
+    ]
+  },
+  {
+    "sku": "ITDR02120001",
+    "itemId": "ITDR.MFA",
+    "licenseType": "subscription",
+    "termMonths": 12,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на ПО Indeed ITDR MFA на 1 (один) год",
+    "sources": [
+      {
+        "sourceId": "S02",
+        "locator": "t2.r3"
+      }
+    ]
+  },
+  {
+    "sku": "ITDR-01-0001",
+    "itemId": "ITDR.MONITORING",
+    "licenseType": "perpetual",
+    "termMonths": null,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на ПО Indeed ITDR Monitoring",
+    "sources": [
+      {
+        "sourceId": "S02",
+        "locator": "t3.r2"
+      }
+    ]
+  },
+  {
+    "sku": "ITDR-02-0001",
+    "itemId": "ITDR.MFA",
+    "licenseType": "perpetual",
+    "termMonths": null,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на ПО Indeed ITDR MFA",
+    "sources": [
+      {
+        "sourceId": "S02",
+        "locator": "t3.r3"
+      }
+    ]
+  },
+  {
+    "sku": "CM-12000001",
+    "itemId": "CM.WINDOWS.BASE",
+    "licenseType": "subscription",
+    "termMonths": 12,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на программу для ЭВМ Indeed Certificate Manager на 1 (один) год",
+    "sources": [
+      {
+        "sourceId": "S03",
+        "locator": "t2.r2"
+      }
+    ]
+  },
+  {
+    "sku": "CM-12000002",
+    "itemId": "CM.WINDOWS.AGENT",
+    "licenseType": "subscription",
+    "termMonths": 12,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности Модуль Клиентский агент Indeed CM для программы для ЭВМ Indeed Certificate Manager на 1 (один) год",
+    "sources": [
+      {
+        "sourceId": "S03",
+        "locator": "t2.r3"
+      }
+    ]
+  },
+  {
+    "sku": "CM-00000001",
+    "itemId": "CM.WINDOWS.BASE",
+    "licenseType": "perpetual",
+    "termMonths": null,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на программу для ЭВМ Indeed Certificate Manager",
+    "sources": [
+      {
+        "sourceId": "S03",
+        "locator": "t3.r2"
+      }
+    ]
+  },
+  {
+    "sku": "CM-00000002",
+    "itemId": "CM.WINDOWS.AGENT",
+    "licenseType": "perpetual",
+    "termMonths": null,
+    "packageCapacity": null,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на дополнительные функциональные возможности Модуль Клиентский агент Indeed CM для программы для ЭВМ Indeed Certificate Manager",
+    "sources": [
+      {
+        "sourceId": "S03",
+        "locator": "t3.r3"
+      }
+    ]
+  },
+  {
+    "sku": "PAM-01120060",
+    "itemId": "PAM.UL",
+    "licenseType": "subscription",
+    "termMonths": 12,
+    "packageCapacity": 60,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на Программу для ЭВМ Indeed Privileged Access Manager (пакет на - 60 пользователей) на 1 (один) год",
+    "sources": [
+      {
+        "sourceId": "S04",
+        "locator": "t2.r2"
+      }
+    ]
+  },
+  {
+    "sku": "PF-01060010",
+    "itemId": "PAM.UL",
+    "licenseType": "subscription",
+    "termMonths": 6,
+    "packageCapacity": 10,
+    "certifiedEvidence": true,
+    "labelExample": "Неисключительные права на программу для ЭВМ Indeed Privileged Access Manager (пакет на -  10 пользователей) на 6 (шесть) месяцев",
+    "sources": [
+      {
+        "sourceId": "S05",
+        "locator": "t2.r2"
+      }
+    ]
+  },
+  {
+    "sku": null,
+    "itemId": "PAM.FSTEC_KIT",
+    "licenseType": "not_applicable",
+    "termMonths": null,
+    "packageCapacity": null,
+    "certifiedEvidence": true,
+    "labelExample": "Сертифицированный ФСТЭК комплект Indeed Privileged Access Manager***",
+    "sources": [
+      {
+        "sourceId": "S05",
+        "locator": "t2.r3"
+      }
+    ]
+  },
+  {
+    "sku": "PAM-02120010",
+    "itemId": "PAM.CS",
+    "licenseType": "subscription",
+    "termMonths": 12,
+    "packageCapacity": 10,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на программу для ЭВМ Indeed Privileged Access Manager (пакет на одновременные подключения - 10) на 1 (один) год",
+    "sources": [
+      {
+        "sourceId": "S06",
+        "locator": "t2.r2"
+      }
+    ]
+  },
+  {
+    "sku": "PAM-02000010",
+    "itemId": "PAM.CS",
+    "licenseType": "perpetual",
+    "termMonths": null,
+    "packageCapacity": 10,
+    "certifiedEvidence": null,
+    "labelExample": "Неисключительные права на программу для ЭВМ Indeed Privileged Access Manager (пакет на одновременные подключения - 10)",
+    "sources": [
+      {
+        "sourceId": "S06",
+        "locator": "t3.r2"
+      }
+    ]
+  }
+]

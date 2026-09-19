@@ -1,0 +1,350 @@
+{
+  "sourceId": "S08",
+  "sheets": {
+    "subscription": "RUB ALL ПОДПИСКА",
+    "perpetual": "RUB ALL БЕССРОЧНАЯ"
+  },
+  "items": [
+    {
+      "itemId": "AM.BASE",
+      "product": "AM",
+      "label": "Indeed Access Manager",
+      "platform": null,
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 5,
+      "perpetualRow": 5,
+      "sourceLabel": "Неисключительные права на программу для ЭВМ Indeed Access Manager"
+    },
+    {
+      "itemId": "AM.WINDOWS_LOGON",
+      "product": "AM",
+      "label": "Windows Logon",
+      "platform": null,
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 6,
+      "perpetualRow": 6,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности  модуль Windows Logon для программы для ЭВМ Indeed Access Manager"
+    },
+    {
+      "itemId": "AM.ESSO",
+      "product": "AM",
+      "label": "Enterprise Single Sign-On",
+      "platform": null,
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 7,
+      "perpetualRow": 8,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности  модуль Enterprise Single Sign-On (Enterprise SSO) для программы для ЭВМ Indeed Access Manager"
+    },
+    {
+      "itemId": "AM.NPS_RADIUS",
+      "product": "AM",
+      "label": "NPS RADIUS Extension",
+      "platform": null,
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 8,
+      "perpetualRow": 11,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности  Модуль NPS RADIUS Extension для программы для ЭВМ Indeed Access Manager"
+    },
+    {
+      "itemId": "AM.FREERADIUS",
+      "product": "AM",
+      "label": "FreeRADIUS Extension",
+      "platform": null,
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 9,
+      "perpetualRow": 12,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности  модуль  FreeRADIUS Extension для программы для ЭВМ Indeed Access Manager"
+    },
+    {
+      "itemId": "AM.IDP",
+      "product": "AM",
+      "label": "Identity Provider",
+      "platform": null,
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 10,
+      "perpetualRow": 9,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности модуль Indeed AM Identity Provider для программы для ЭВМ Indeed Access Manager"
+    },
+    {
+      "itemId": "AM.IIS",
+      "product": "AM",
+      "label": "IIS Extension",
+      "platform": null,
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 11,
+      "perpetualRow": 14,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности  Модуль IIS Extension для программы для ЭВМ Indeed Access Manager"
+    },
+    {
+      "itemId": "AM.MDP",
+      "product": "AM",
+      "label": "Mobile Device Provisioning",
+      "platform": null,
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 12,
+      "perpetualRow": 13,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности Модуль Mobile Device Provisioning для программы для ЭВМ Indeed Access Manager"
+    },
+    {
+      "itemId": "AM.RDP_LOGON",
+      "product": "AM",
+      "label": "RDP Windows Logon",
+      "platform": null,
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 13,
+      "perpetualRow": 7,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности  Модуль RDP Windows Logon для программы для ЭВМ Indeed Access Manager"
+    },
+    {
+      "itemId": "AM.API",
+      "product": "AM",
+      "label": "API",
+      "platform": null,
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 14,
+      "perpetualRow": 17,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности  Модуль API для программы для ЭВМ Indeed Access Manager"
+    },
+    {
+      "itemId": "AM.LDAP_PROXY",
+      "product": "AM",
+      "label": "LDAP Proxy",
+      "platform": null,
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 15,
+      "perpetualRow": 15,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности Модуль LDAP Proxy для программы для ЭВМ Indeed Access Manager"
+    },
+    {
+      "itemId": "AM.LINUX_LOGON",
+      "product": "AM",
+      "label": "Linux Logon",
+      "platform": null,
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 16,
+      "perpetualRow": 16,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности Модуль Linux Logon для программы для ЭВМ Indeed Access Manager"
+    },
+    {
+      "itemId": "AM.ADFS",
+      "product": "AM",
+      "label": "ADFS Extension",
+      "platform": null,
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 17,
+      "perpetualRow": 10,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности  Модуль ADFS Extension для программы для ЭВМ Indeed Access Manager"
+    },
+    {
+      "itemId": "AM.BIOMETRICS",
+      "product": "AM",
+      "label": "Биометрическая аутентификация",
+      "platform": null,
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 18,
+      "perpetualRow": 18,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности: Биометрическая аутентификация"
+    },
+    {
+      "itemId": "CM.WINDOWS.BASE",
+      "product": "CM",
+      "label": "Indeed Certificate Manager Windows",
+      "platform": "windows",
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 21,
+      "perpetualRow": 21,
+      "sourceLabel": "Неисключительные права на программу для ЭВМ Indeed Certificate Manager"
+    },
+    {
+      "itemId": "CM.WINDOWS.AGENT",
+      "product": "CM",
+      "label": "Клиентский агент Indeed CM",
+      "platform": "windows",
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 22,
+      "perpetualRow": 22,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности Модуль Клиентский агент Indeed CM для программы для ЭВМ Indeed Certificate Manager "
+    },
+    {
+      "itemId": "CM.WINDOWS.AIRCARD",
+      "product": "CM",
+      "label": "AirCard Enterprise",
+      "platform": "windows",
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 23,
+      "perpetualRow": 23,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности Модуль AirCard Enterprise  для программы для ЭВМ Indeed Certificate Manager"
+    },
+    {
+      "itemId": "CM.WINDOWS.DSS",
+      "product": "CM",
+      "label": "Интеграция с КриптоПро DSS",
+      "platform": "windows",
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 24,
+      "perpetualRow": 24,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности Модуль интеграции с КриптоПро DSS для программы для ЭВМ Indeed Certificate Manager"
+    },
+    {
+      "itemId": "CM.MULTIPLATFORM.BASE",
+      "product": "CM",
+      "label": "Indeed Certificate Manager Мультиплатформа",
+      "platform": "multiplatform",
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 27,
+      "perpetualRow": 27,
+      "sourceLabel": "Неисключительные права на программу для ЭВМ -  Indeed Certificate Manager"
+    },
+    {
+      "itemId": "CM.MULTIPLATFORM.AGENT",
+      "product": "CM",
+      "label": "CM Agent",
+      "platform": "multiplatform",
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 28,
+      "perpetualRow": 29,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности  Модуль CM Agent для программы для ЭВМ Indeed Certificate Manager"
+    },
+    {
+      "itemId": "CM.MULTIPLATFORM.AIRKEY",
+      "product": "CM",
+      "label": "AirKey Enterprise",
+      "platform": "multiplatform",
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 29,
+      "perpetualRow": 28,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности модуль AirKey Enterprise  для программы для ЭВМ Indeed Certificate Manager "
+    },
+    {
+      "itemId": "CM.MULTIPLATFORM.DSS",
+      "product": "CM",
+      "label": "CM DSS",
+      "platform": "multiplatform",
+      "metric": "users",
+      "saleRepresentation": "units",
+      "subscriptionRow": 30,
+      "perpetualRow": 30,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности Модуль CM DSS для программы для ЭВМ Indeed Certificate Manager"
+    },
+    {
+      "itemId": "PAM.UL",
+      "product": "PAM",
+      "label": "Indeed PAM по пользователям",
+      "platform": null,
+      "metric": "users",
+      "saleRepresentation": "package_1",
+      "subscriptionRow": 33,
+      "perpetualRow": 33,
+      "sourceLabel": "Неисключительные права на Программу для ЭВМ Indeed Privileged Access Manager (пакет на пользователей- кол-во шт)"
+    },
+    {
+      "itemId": "PAM.CS",
+      "product": "PAM",
+      "label": "Indeed PAM по одновременным подключениям",
+      "platform": null,
+      "metric": "concurrent_sessions",
+      "saleRepresentation": "package_1",
+      "subscriptionRow": 35,
+      "perpetualRow": 35,
+      "sourceLabel": "Неисключительные права на Программу для ЭВМ Indeed Privileged Access Manager (пакет на одновременные подключения -кол-во шт) "
+    },
+    {
+      "itemId": "PAM.RL",
+      "product": "PAM",
+      "label": "Indeed PAM по ресурсам",
+      "platform": null,
+      "metric": "resources",
+      "saleRepresentation": "requires_catalog_definition",
+      "subscriptionRow": 37,
+      "perpetualRow": 37,
+      "sourceLabel": "Неисключительные права на Программу для ЭВМ Indeed Privileged Access Manager (пакет на - кол-во штук ресурсных лицензий)  "
+    },
+    {
+      "itemId": "PAM.FSTEC_KIT",
+      "product": "PAM",
+      "label": "Сертифицированный ФСТЭК комплект Indeed PAM",
+      "platform": null,
+      "metric": "kits",
+      "saleRepresentation": "units",
+      "subscriptionRow": 39,
+      "perpetualRow": 39,
+      "sourceLabel": "Сертифицированный ФСТЭК комплект Indeed Privileged Access Manager"
+    },
+    {
+      "itemId": "PAM.AAPM",
+      "product": "PAM",
+      "label": "Application to Application Password Management",
+      "platform": null,
+      "metric": "service_accounts",
+      "saleRepresentation": "requires_catalog_definition",
+      "subscriptionRow": 40,
+      "perpetualRow": 40,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности Модуль Application to Application Password Management для программы для ЭВМ Indeed Privileged Access Manager (пакет на ... учетных записей, шт.)"
+    },
+    {
+      "itemId": "PAM.ARBITRARY_RESOURCES",
+      "product": "PAM",
+      "label": "Произвольные ресурсы",
+      "platform": null,
+      "metric": "packages",
+      "saleRepresentation": "requires_catalog_definition",
+      "subscriptionRow": 41,
+      "perpetualRow": 41,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности Модуль \"Произвольные ресурсы\" для программы для ЭВМ Indeed Privileged Access Manager  (пакет на - x пользователей/одновременных подключений)"
+    },
+    {
+      "itemId": "PAM.SQL_PROXY",
+      "product": "PAM",
+      "label": "SQL Proxy",
+      "platform": null,
+      "metric": "permissions",
+      "saleRepresentation": "requires_catalog_definition",
+      "subscriptionRow": 42,
+      "perpetualRow": 42,
+      "sourceLabel": "Неисключительные права на дополнительные функциональные возможности Модуль \"SQL Proxy\" для программы для ЭВМ Indeed Privileged Access Manager  (пакет на - x разрешений)"
+    },
+    {
+      "itemId": "ITDR.MFA",
+      "product": "ITDR",
+      "label": "Indeed ITDR MFA",
+      "platform": null,
+      "metric": "licensed_units",
+      "saleRepresentation": "units",
+      "subscriptionRow": 45,
+      "perpetualRow": 45,
+      "sourceLabel": "Неисключительные права на ПО Indeed ITDR MFA"
+    },
+    {
+      "itemId": "ITDR.MONITORING",
+      "product": "ITDR",
+      "label": "Indeed ITDR Monitoring",
+      "platform": null,
+      "metric": "licensed_units",
+      "saleRepresentation": "units",
+      "subscriptionRow": 46,
+      "perpetualRow": 46,
+      "sourceLabel": "Неисключительные права на ПО Indeed ITDR Monitoring"
+    }
+  ]
+}

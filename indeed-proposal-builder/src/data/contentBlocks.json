@@ -1,0 +1,971 @@
+[
+  {
+    "id": "common.title",
+    "version": 1,
+    "section": "title",
+    "title": "Название документа",
+    "condition": {
+      "always": true
+    },
+    "paragraphs": [
+      "Коммерческое предложение"
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S04",
+        "locator": "p1"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "intro.am",
+    "version": 1,
+    "section": "intro",
+    "title": "Вводный текст AM",
+    "condition": {
+      "product": "AM"
+    },
+    "paragraphs": [
+      "Компания “Индид” предлагает Вашему вниманию предварительный расчет стоимости ПО Indeed по управлению доступом в приложения и информационные системы."
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S07",
+        "locator": "p4"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "intro.cm",
+    "version": 1,
+    "section": "intro",
+    "title": "Вводный текст CM",
+    "condition": {
+      "product": "CM"
+    },
+    "paragraphs": [
+      "Компания «Индид» предлагает Вашему вниманию предварительный расчет стоимости поставки продуктов Indeed Identity по управлению смарт-картами и сертификатами."
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S03",
+        "locator": "p2"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "intro.pam",
+    "version": 1,
+    "section": "intro",
+    "title": "Вводный текст PAM",
+    "condition": {
+      "product": "PAM"
+    },
+    "paragraphs": [
+      "Компания «Индид» предлагает Вашему вниманию предварительный расчет стоимости системы Indeed по контролю привилегированных пользователей."
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S04",
+        "locator": "p2"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "intro.itdr",
+    "version": 1,
+    "section": "intro",
+    "title": "Вводный текст ITDR",
+    "condition": {
+      "product": "ITDR"
+    },
+    "paragraphs": [
+      "Компания «Индид» предлагает Вашему вниманию предварительный расчет стоимости системы комплексной защиты учетных данных в корпоративной сети."
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S02",
+        "locator": "p4"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "validity.days",
+    "version": 1,
+    "section": "validity",
+    "title": "Срок действия в днях",
+    "condition": {
+      "validity.kind": "days"
+    },
+    "paragraphs": [
+      "Данное предложение действительно в течение {{validity.days}} дней."
+    ],
+    "variables": [
+      "validity.days"
+    ],
+    "sourceRefs": [
+      {
+        "sourceId": "S04",
+        "locator": "p2"
+      }
+    ],
+    "notes": "30 дней — наблюдаемый вариант; не скрытый обязательный срок."
+  },
+  {
+    "id": "validity.month",
+    "version": 1,
+    "section": "validity",
+    "title": "Срок действия в месяцах",
+    "condition": {
+      "validity.kind": "calendar_months"
+    },
+    "paragraphs": [
+      "Данное предложение действительно в течение {{validity.calendar_months_text}}."
+    ],
+    "variables": [
+      "validity.calendar_months_text"
+    ],
+    "sourceRefs": [
+      {
+        "sourceId": "S06",
+        "locator": "p3"
+      }
+    ],
+    "notes": "В исходнике «в течение месяца». Месяц и 30 дней не эквивалентны."
+  },
+  {
+    "id": "validity.purchase_year",
+    "version": 1,
+    "section": "validity",
+    "title": "Условие года закупки",
+    "condition": {
+      "validity.kind": "purchase_year"
+    },
+    "paragraphs": [
+      "Данное предложение действительно при условии закупки в {{validity.purchase_year}} году."
+    ],
+    "variables": [
+      "validity.purchase_year"
+    ],
+    "sourceRefs": [
+      {
+        "sourceId": "S03",
+        "locator": "p2"
+      }
+    ],
+    "notes": "2027 из S03 не становится настройкой остальных КП."
+  },
+  {
+    "id": "table.subscription",
+    "version": 1,
+    "section": "pricing",
+    "title": "Заголовок годового расчёта",
+    "condition": {
+      "option.license_type": "subscription",
+      "option.term_months": 12
+    },
+    "paragraphs": [
+      "Таблица {{table.number}}. Расчет {{option.price_label}} годовых лицензий{{footnote.marker}}"
+    ],
+    "variables": [
+      "footnote.marker",
+      "option.price_label",
+      "table.number"
+    ],
+    "sourceRefs": [
+      {
+        "sourceId": "S06",
+        "locator": "p4"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "table.term",
+    "version": 1,
+    "section": "pricing",
+    "title": "Заголовок срочного расчёта",
+    "condition": {
+      "option.license_type": "subscription",
+      "option.term_months_not": 12
+    },
+    "paragraphs": [
+      "Таблица {{table.number}}. Расчет {{option.price_label}} срочных лицензий{{footnote.marker}}"
+    ],
+    "variables": [
+      "footnote.marker",
+      "option.price_label",
+      "table.number"
+    ],
+    "sourceRefs": [
+      {
+        "sourceId": "S05",
+        "locator": "p4"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "table.perpetual",
+    "version": 1,
+    "section": "pricing",
+    "title": "Заголовок бессрочного расчёта",
+    "condition": {
+      "option.license_type": "perpetual"
+    },
+    "paragraphs": [
+      "Таблица {{table.number}}. Расчет {{option.price_label}} бессрочных лицензий{{footnote.marker}}"
+    ],
+    "variables": [
+      "footnote.marker",
+      "option.price_label",
+      "table.number"
+    ],
+    "sourceRefs": [
+      {
+        "sourceId": "S06",
+        "locator": "p6"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "license.subscription",
+    "version": 1,
+    "section": "license_note",
+    "title": "Гарантия срочной лицензии",
+    "condition": {
+      "option.license_type": "subscription"
+    },
+    "paragraphs": [
+      "{{footnote.marker}}В стоимость лицензий включена гарантия на ПО и доступ к обновлениям в течение срока действия лицензии. НДС не облагается."
+    ],
+    "variables": [
+      "footnote.marker"
+    ],
+    "sourceRefs": [
+      {
+        "sourceId": "S04",
+        "locator": "p4"
+      }
+    ],
+    "notes": "Налоговая фраза относится к лицензиям. Комплект ФСТЭК описывается отдельно. Историческая формулировка, не заключение о действующем праве."
+  },
+  {
+    "id": "license.perpetual",
+    "version": 1,
+    "section": "license_note",
+    "title": "Гарантия бессрочной лицензии",
+    "condition": {
+      "option.license_type": "perpetual"
+    },
+    "paragraphs": [
+      "{{footnote.marker}}В стоимость лицензий включена гарантия на ПО и доступ к обновлениям в течение {{support.included_months}} месяцев. НДС не облагается."
+    ],
+    "variables": [
+      "footnote.marker",
+      "support.included_months"
+    ],
+    "sourceRefs": [
+      {
+        "sourceId": "S06",
+        "locator": "p7"
+      }
+    ],
+    "notes": "В корпусе included_months=12; для других сроков требуется правило."
+  },
+  {
+    "id": "pam.fstec.vat",
+    "version": 1,
+    "section": "certification",
+    "title": "НДС комплекта ФСТЭК",
+    "condition": {
+      "has_item": "PAM.FSTEC_KIT"
+    },
+    "paragraphs": [
+      "{{footnote.marker}}Сертифицированный ФСТЭК комплект облагается НДС {{kit.vat_rate_percent}}% — {{kit.vat_amount_formatted}} ({{kit.vat_amount_words}})."
+    ],
+    "variables": [
+      "footnote.marker",
+      "kit.vat_amount_formatted",
+      "kit.vat_amount_words",
+      "kit.vat_rate_percent"
+    ],
+    "sourceRefs": [
+      {
+        "sourceId": "S05",
+        "locator": "p6"
+      }
+    ],
+    "notes": "В S05 ставка 22%, НДС 550,00 при полной цене 3050,00. Формировать из налога строки, не хранить 550 как универсальную константу."
+  },
+  {
+    "id": "pam.fstec.contents",
+    "version": 1,
+    "section": "certification",
+    "title": "Состав комплекта ФСТЭК",
+    "condition": {
+      "product": "PAM",
+      "has_item": "PAM.FSTEC_KIT"
+    },
+    "paragraphs": [
+      "{{footnote.marker}}Сертифицированный ФСТЭК комплект Indeed Privileged Access Manager включает:",
+      "DVD-диск с идентификатором изделия, на котором размещены: дистрибутив сертифицированного программного комплекса «Indeed Privileged Access Manager», Руководство администратора, Руководство пользователя, Руководство по установке, Контрольные суммы исполняемых файлов после инсталляции для Windows и Linux платформы.",
+      "Пластиковый бокс для DVD-диска с фирменным оформлением ООО «Индид»",
+      "Бумажная версия Формуляра с идентификатором изделия",
+      "Бумажная копия сертификата ФСТЭК России №{{certification.certificate_number}}, заверенная ООО «Индид»"
+    ],
+    "variables": [
+      "certification.certificate_number",
+      "footnote.marker"
+    ],
+    "sourceRefs": [
+      {
+        "sourceId": "S05",
+        "locator": "p7"
+      },
+      {
+        "sourceId": "S05",
+        "locator": "p8"
+      },
+      {
+        "sourceId": "S05",
+        "locator": "p9"
+      },
+      {
+        "sourceId": "S05",
+        "locator": "p10"
+      },
+      {
+        "sourceId": "S05",
+        "locator": "p11"
+      }
+    ],
+    "notes": "Состав и сертификат №4667 зафиксированы в S05. Не переносить сертификат на другие продукты. S06 — конфликтный экземпляр, не основание включать комплект."
+  },
+  {
+    "id": "pam.license.ul",
+    "version": 1,
+    "section": "licensing",
+    "title": "PAM по пользователям",
+    "condition": {
+      "product": "PAM",
+      "metric": "users"
+    },
+    "paragraphs": [
+      "Пользовательская лицензия (user license, UL). Лицензия дает право на использование Indeed PAM заданному количеству пользователей. Каждый сотрудник, получающий доступ к ресурсам с помощью привилегированных учетных записей, должен иметь пользовательскую лицензию PAM. Количество пользовательских лицензий может быть изменено в сторону увеличения путем приобретения дополнительного количества лицензий. Пользовательская лицензия может быть отозвана у одного сотрудника и выдана другому."
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S04",
+        "locator": "p5"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "pam.license.cs",
+    "version": 1,
+    "section": "licensing",
+    "title": "PAM по одновременным подключениям",
+    "condition": {
+      "product": "PAM",
+      "metric": "concurrent_sessions"
+    },
+    "paragraphs": [
+      "Лицензия на количество одновременных подключений (concurrent sessions, CS). Лицензия ограничивает число сессий (подключений), которые можно открыть в Indeed PAM одновременно. Учитываются все активные сессии. При этом число пользователей РАМ и число зарегистрированных ресурсов в системе не ограничено."
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S06",
+        "locator": "p14"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "am.base",
+    "version": 1,
+    "section": "description",
+    "title": "Описание AM BASE",
+    "condition": {
+      "product": "AM",
+      "has_item": "AM.BASE"
+    },
+    "paragraphs": [
+      "Indeed Access Manager",
+      "Indeed Access Manager (Indeed AM) является платформой аутентификации и предоставляет инфраструктуру для всех компонентов платформы: сервер аутентификации и управления, база данных, консоль администратора и инструменты самообслуживания пользователей."
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S01",
+        "locator": "p12"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p13"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "am.adfs",
+    "version": 1,
+    "section": "description",
+    "title": "Описание AM ADFS",
+    "condition": {
+      "product": "AM",
+      "has_item": "AM.ADFS"
+    },
+    "paragraphs": [
+      "Indeed AM ADFS Extension",
+      "Web-приложения на базе сервера Internet Information Services (IIS) могут быть интегрированы с программным комплексом Indeed AM с использованием механизма ADFS и компонента Indeed AM ADFS Extension. Компонент ADFS Extension реализует провайдер мультифакторной аутентификации для сервера Microsoft ADFS, добавляя в процесс получения доступа второй фактор. Такой подход дает возможность интегрироваться с целевыми приложениями без их модификации: при входе в приложение пользователь перенаправляется на веб страницу аутентификации ADFS, где через провайдер аутентификации Indeed AM ADFS Extension у него запрашивается второй фактор, после успешной аутентификации пользователь возвращается в целевое приложение.",
+      "Технологию ADFS поддерживают веб-приложения Microsoft, такие как Outlook Web Access, Sharepoint, Skype for Business, Office 365 и др..",
+      "Indeed AM ADFS Extension в качестве второго фактора поддерживает аутентификацию с помощью одноразовых паролей OATH TOTP и HOTP, одноразовых кодов через SMS и EMail и out-of-band аутентификации с использованием мобильного приложения Indeed AirKey Cloud."
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S01",
+        "locator": "p14"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p15"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p16"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p17"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "am.esso",
+    "version": 1,
+    "section": "description",
+    "title": "Описание AM ESSO",
+    "condition": {
+      "product": "AM",
+      "has_item": "AM.ESSO"
+    },
+    "paragraphs": [
+      "Indeed AM Enterprise Single Sign-On",
+      "Indeed AM Enterprise SSO реализует подход single sign-on для приложений, требующих от пользователя отдельной аутентификации по имени и паролю. Система централизованно хранит учетные данные от целевых приложений и автоматически подставляет их в экранные формы, когда приложение того требует. Технология Indeed AM Enterprise SSO может быть применена для любых типов приложений (windows, web, .net), независимо от архитектуры: одно-звенная, двух-звенная, трех-звенная, “толстый” клиент, “тонкий” клиент, терминальные приложения."
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S01",
+        "locator": "p18"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p19"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "am.iis",
+    "version": 1,
+    "section": "description",
+    "title": "Описание AM IIS",
+    "condition": {
+      "product": "AM",
+      "has_item": "AM.IIS"
+    },
+    "paragraphs": [
+      "Indeed AM IIS Extension",
+      "Для аутентификации в web-приложениях, использующих Internet Information Services (IIS), используется модуль интеграции IIS Extension (Indeed AM IIS Extension). Данный модуль позволяет обеспечить двухфакторную аутентификацию в приложениях без вмешательства в их программный код. После ввода имени и пароля, пользователь перенаправляется на отдельную страницу аутентификации, где должен подтвердить себя с помощью одноразового пароля. IIS Extension может использоваться для любых web-приложений, например Outlook Web Access, Sharepoint, Skype for Business, RD Web Access и др."
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S01",
+        "locator": "p20"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p21"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "am.nps_radius",
+    "version": 1,
+    "section": "description",
+    "title": "Описание AM NPS_RADIUS",
+    "condition": {
+      "product": "AM",
+      "has_item": "AM.NPS_RADIUS"
+    },
+    "paragraphs": [
+      "Indeed AM NPS RADIUS Extension",
+      "Indeed AM NPS RADIUS Extension позволяет выполнять аутентификацию с помощью различных технологий одноразовых паролей в RADIUS-совместимых системах: VPN, VDI и др. Поддерживается как однофакторная аутентификация, когда для успешной аутентификации пользователю достаточно указать логин и одноразовый пароль, так и двухфакторная (двухшаговая) схема аутентификации, когда на первом шаге пользователь указывает логин и постоянный пароль, а на втором одноразовый пароль. Для получения одноразовых паролей поддерживаются программные и аппаратные генераторы паролей по протоколам OATH TOTP и HTOTP, а также отправка одноразовых паролей по SMS и email."
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S01",
+        "locator": "p22"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p23"
+      }
+    ],
+    "notes": "Исходник содержит HTOTP. Сохранено дословно; терминологию должен проверить владелец продукта."
+  },
+  {
+    "id": "am.freeradius",
+    "version": 1,
+    "section": "description",
+    "title": "Описание AM FREERADIUS",
+    "condition": {
+      "product": "AM",
+      "has_item": "AM.FREERADIUS"
+    },
+    "paragraphs": [
+      "Indeed АМ FreeRADIUS Extension",
+      "Indeed FreeRADIUS Extension (FreeRADIUS Extension) представляет собой модуль, позволяющий реализовать технологию двухфакторной аутентификации для RADIUS-совместимых сервисов и приложений. Модуль FreeRADIUS Extension основан на открытом исходном коде FreeRADIUS-сервера. Поддерживаются различные способы аутентификации: с помощью одного фактора в виде OTP-кодов, так и двухфакторная с использованием доменного пароля и дополнительного фактора в виде Push-уведодмления или OTP-кодов различных вариаций."
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S01",
+        "locator": "p24"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p26"
+      }
+    ],
+    "notes": "В исходнике опечатка «Push-уведодмления»; исходный текст сохранён."
+  },
+  {
+    "id": "am.windows_logon",
+    "version": 1,
+    "section": "description",
+    "title": "Описание AM WINDOWS_LOGON",
+    "condition": {
+      "product": "AM",
+      "has_item": "AM.WINDOWS_LOGON"
+    },
+    "paragraphs": [
+      "Indeed AM Windows Logon",
+      "Indeed AM Windows Logon реализует функции строгой аутентификации пользователей в ОС Windows. Стандартный интерфейс аутентификации по постоянному паролю заменяется на интерфейс Indeed AM Windows Logon, где пользователь может пройти процедуру аутентификации с помощью любого поддерживаемого системой способа: биометрия, смарт-карты, одноразовые пароли и др. Для замены интерфейса входа в ОС используется штатный механизм Windows Credential Provider в соответствии с рекомендациями Microsoft."
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S01",
+        "locator": "p28"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p29"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "am.rdp_logon",
+    "version": 1,
+    "section": "description",
+    "title": "Описание AM RDP_LOGON",
+    "condition": {
+      "product": "AM",
+      "has_item": "AM.RDP_LOGON"
+    },
+    "paragraphs": [
+      "Indeed AM RDP Windows Logon",
+      "Модуль Indeed AM RDP Windows Logon позволяет при удаленным подключении к серверам Windows Server по протоколу RDP использовать двухфакторную аутентификацию с применением технологии одноразовых паролей. Аутентификация выполняется в два шага: на первом пользователь указывает доменные учетные данные, на втором - одноразовый пароль. Для получения одноразовых паролей поддерживаются программные и аппаратные генераторы паролей по протоколам OATH TOTP и HTOTP, а также отправка одноразовых паролей по SMS."
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S01",
+        "locator": "p30"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p31"
+      }
+    ],
+    "notes": "Исходник содержит HTOTP. Сохранено дословно; терминологию должен проверить владелец продукта."
+  },
+  {
+    "id": "am.idp",
+    "version": 1,
+    "section": "description",
+    "title": "Описание AM IDP",
+    "condition": {
+      "product": "AM",
+      "has_item": "AM.IDP"
+    },
+    "paragraphs": [
+      "Indeed AM Identity Provider",
+      "Indeed AM Identity Provider (IDP) реализует сквозной доступ в web-приложения (web single sign-on), что значительно повышает эффективность работы пользователей, позволяя прозрачно получать доступ в web-приложения после однократной аутентификации. Indeed AM IDP поддерживает двухфакторную аутентификацию, что дает возможность сохранить высокий уровень информационной безопасности без снижения удобства использования. Для интеграции с целевыми решениями используются международные стандарты аутентификации SAML 2.0 и OpenID Connect 1.0, что гарантирует совместимость с широким спектром систем. В контур Indeed AM IDP и 2FA могут быть включены не только корпоративные on-premise приложения, но и облачные сервисы, такие как Office 365 и G Suite (ранее Google Apps)."
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S01",
+        "locator": "p32"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p33"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "am.mdp",
+    "version": 1,
+    "section": "description",
+    "title": "Описание AM MDP",
+    "condition": {
+      "product": "AM",
+      "has_item": "AM.MDP"
+    },
+    "paragraphs": [
+      "Indeed AM Mobile Device Provisioning",
+      "Когда пользователь настраивает почтовый аккаунт на новом устройстве через Exchange ActiveSync, устройство автоматически попадает в карантин. Чтобы начать получать почту, необходимо вывести устройство из карантина. Сделать это можно с помощью специального сервиса подготовки мобильных устройств. Сервис представляет собой дополнительную вкладку в User Console, в которой пользователь может самостоятельно вывести устройство из карантина.",
+      "Для сервиса подготовки мобильных устройств предусмотрена двухфакторная аутентификация через модуль Indeed AM Identity Provider. Если пользователь прошел аутентификацию в User Console, он автоматически проходит аутентификацию в сервис подготовки мобильных устройств."
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S01",
+        "locator": "p34"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p35"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p36"
+      }
+    ],
+    "notes": "В тексте упоминается зависимость от IDP. Коммерческое правило обязательной совместной закупки не установлено."
+  },
+  {
+    "id": "am.api",
+    "version": 1,
+    "section": "description",
+    "title": "Описание AM API",
+    "condition": {
+      "product": "AM",
+      "has_item": "AM.API"
+    },
+    "paragraphs": [
+      "Indeed AM API",
+      "Indeed AM API представляет собой программный интерфейс для интеграции с внешними системами для реализации дополнительных сценариев управления настройками продукта или аутентификации пользователей. Примерами систем, с которыми может быть реализована интеграция, являются Identity Management системы и СКУД."
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S01",
+        "locator": "p37"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p38"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "am.linux_logon",
+    "version": 1,
+    "section": "description",
+    "title": "Описание AM LINUX_LOGON",
+    "condition": {
+      "product": "AM",
+      "has_item": "AM.LINUX_LOGON"
+    },
+    "paragraphs": [
+      "Indeed AM Linux Logon",
+      "Indeed AM Linux Logon реализует двухфакторную аутентификацию в рамках операционных систем Linux, включая ОС семейства Astra. Linux Logon обеспечивает 2FA за счет прямой интеграции с компонентом PAM (Pluggable Authentication Module). Такая интеграция позволяет реализовать запрос 2FA во всех пользовательских сценариях доступа к ОС, включая локальный вход, разблокировку, удаленный вход по RDP, SSH, повышение привилегий пользователя (SU)"
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S01",
+        "locator": "p40"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p42"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "am.ldap_proxy",
+    "version": 1,
+    "section": "description",
+    "title": "Описание AM LDAP_PROXY",
+    "condition": {
+      "product": "AM",
+      "has_item": "AM.LDAP_PROXY"
+    },
+    "paragraphs": [
+      "Indeed AM LDAP-Proxy",
+      "LDAP Proxy представляет собой TCP сервер, использующий изолированный в контейнере процесс. После запуска приложение начинает слушать приходящие от клиентов LDAP запросы по TCP каналу. Для решения задачи подтверждения вторым фактором подключения клиента к LDAP серверу предлагается реагировать на Bind запросы клиента к серверу.",
+      "Полученные Bind запросы авторизации перенаправляются на LDAP сервер. После успешной авторизации выполняется запрос к Indeed AM Core серверу для проверки второго фактора авторизации. В случае успешного подтверждения вторым фактором восстанавливается обычный поток обмена данными между клиентом и сервером, иначе клиенту возвращается ответ \"Invalid credentials\".",
+      "Безопасность авторизации может осуществляться двумя способами:",
+      "Протокол LDAPS, шифрование осуществляется на уровне протокола TCP при помощи TLS/SSL сертификатов",
+      "Метод авторизации LDAP.",
+      "В качестве методов аутентификации может использоваться:",
+      "1) Доменный пароль + Indeed Key Push",
+      "2) Доменный пароль + Telegram Push",
+      "3) Доменный пароль без подтверждения второго фактора"
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S01",
+        "locator": "p44"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p45"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p46"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p47"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p48"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p49"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p50"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p51"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p52"
+      },
+      {
+        "sourceId": "S01",
+        "locator": "p53"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "itdr.monitoring",
+    "version": 1,
+    "section": "licensing",
+    "title": "Базовая лицензия ITDR",
+    "condition": {
+      "product": "ITDR",
+      "has_item": "ITDR.MONITORING"
+    },
+    "paragraphs": [
+      "Лицензия Indeed ITDR Monitoring. Данная лицензия является базовой для решения и дает право на использование функций мониторинга, выявления и предотвращения атак на учетные записи. Приобретение этой лицензии является обязательным."
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S02",
+        "locator": "p12"
+      }
+    ],
+    "notes": "Текст прямо указывает, что приобретение Monitoring обязательно."
+  },
+  {
+    "id": "itdr.mfa",
+    "version": 1,
+    "section": "licensing",
+    "title": "Лицензия MFA ITDR",
+    "condition": {
+      "product": "ITDR",
+      "has_item": "ITDR.MFA"
+    },
+    "paragraphs": [
+      "Лицензия Indeed ITDR MFA. Данная лицензия предоставляет право использования модуля MFA для реализации многофакторной аутентификации при доступе к корпоративным ресурсам."
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S02",
+        "locator": "p13"
+      }
+    ],
+    "notes": null
+  },
+  {
+    "id": "itdr.description",
+    "version": 1,
+    "section": "description",
+    "title": "Описание ITDR",
+    "condition": {
+      "product": "ITDR",
+      "has_item": "ITDR.MFA"
+    },
+    "paragraphs": [
+      "Indeed ITDR обеспечивает многофакторную аутентификацию и защиту от атак на учетные данные в любой корпоративной среде, не требуя вносить изменения в защищаемые системы и устанавливать какие-либо агенты или прокси. Инновационная технология позволяет защитить даже такие системы, которые до настоящего времени защитить было невозможно:",
+      "системы, разработанные внутри организации;",
+      "закрытые проприетарные системы;",
+      "административные утилиты, например, PsExec;",
+      "общие сетевые папки;",
+      "Indeed ITDR выполняет глубокий анализ протоколов аутентификации на сетевом уровне, поэтому имеет доступ ко всем событиям использования учетных данных в защищаемом периметре."
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S02",
+        "locator": "p14"
+      },
+      {
+        "sourceId": "S02",
+        "locator": "p15"
+      },
+      {
+        "sourceId": "S02",
+        "locator": "p16"
+      },
+      {
+        "sourceId": "S02",
+        "locator": "p17"
+      },
+      {
+        "sourceId": "S02",
+        "locator": "p18"
+      },
+      {
+        "sourceId": "S02",
+        "locator": "p19"
+      }
+    ],
+    "notes": "Блок обещает MFA. Для конфигурации только Monitoring отдельного нейтрального описания в корпусе нет."
+  },
+  {
+    "id": "common.warranty",
+    "version": 1,
+    "section": "support",
+    "title": "Гарантийное обслуживание",
+    "condition": {
+      "always": true
+    },
+    "paragraphs": [
+      "Гарантийное обслуживание включает:",
+      "Поставка и обновление ПО до последней версии всех приобретенных компонентов в течение гарантийного срока.",
+      "Гарантийное обслуживание продуктов Indeed",
+      "Устранение несоответствий в работе продуктов Indeed.",
+      "Горячая линия и портал технической поддержки (8 800 333-09-06, https://support.indeed-company.ru/ ).",
+      "Проверка новых конфигураций и планируемых изменений в инфраструктуре.",
+      "Подготовка подробных инструкций (планов) по обновлению продуктов Indeed в инфраструктуре Заказчика.",
+      "Доступ к Базе знаний компании Indeed."
+    ],
+    "variables": [],
+    "sourceRefs": [
+      {
+        "sourceId": "S04",
+        "locator": "p7"
+      },
+      {
+        "sourceId": "S04",
+        "locator": "p8"
+      },
+      {
+        "sourceId": "S04",
+        "locator": "p9"
+      },
+      {
+        "sourceId": "S04",
+        "locator": "p10"
+      },
+      {
+        "sourceId": "S04",
+        "locator": "p11"
+      },
+      {
+        "sourceId": "S04",
+        "locator": "p12"
+      },
+      {
+        "sourceId": "S04",
+        "locator": "p13"
+      },
+      {
+        "sourceId": "S04",
+        "locator": "p14"
+      }
+    ],
+    "notes": "Один общий блок на КП; телефон и адрес портала лучше вынести в версионируемый профиль поставщика."
+  },
+  {
+    "id": "common.signature",
+    "version": 1,
+    "section": "signature",
+    "title": "Подпись и должность",
+    "condition": {
+      "always": true
+    },
+    "paragraphs": [
+      "С Уважением,",
+      "{{supplier.signatory_role}}",
+      "{{supplier.signatory_name}}"
+    ],
+    "variables": [
+      "supplier.signatory_name",
+      "supplier.signatory_role"
+    ],
+    "sourceRefs": [
+      {
+        "sourceId": "S04",
+        "locator": "p16"
+      },
+      {
+        "sourceId": "S04",
+        "locator": "p17"
+      },
+      {
+        "sourceId": "S04",
+        "locator": "p18"
+      },
+      {
+        "sourceId": "S04",
+        "locator": "p19"
+      }
+    ],
+    "notes": "В корпусе два варианта должности; выбор хранится в профиле поставщика. Изображения подписи и печати отдельно от текста."
+  }
+]
