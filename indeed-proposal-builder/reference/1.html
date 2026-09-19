@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Конструктор КП — макет</title>
+  <style>
+    :root {
+      --red: #e30613;
+      --red-dark: #c90510;
+      --red-soft: #fff0f1;
+      --green: #18a957;
+      --text: #161a24;
+      --muted: #6f7787;
+      --line: #e8ebf0;
+      --line-dark: #d9dee8;
+      --bg: #f7f8fb;
+      --card: #ffffff;
+      --field: #fafbfc;
+      --shadow: 0 2px 8px rgba(25, 28, 40, 0.04);
+      --radius: 10px;
+      --sidebar: 224px;
+      --preview: 520px;
+      --canvas-w: 1792px;
+      --canvas-h: 1024px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: var(--canvas-w);
+      min-height: var(--canvas-h);
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 14px;
+      letter-spacing: -0.01em;
+      overflow: auto;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: var(--sidebar) 1fr;
+      width: var(--canvas-w);
+      height: var(--canvas-h);
+      overflow: hidden;
+      background: var(--bg);
+      transition: grid-template-columns .22s ease;
+    }
+
+    .app.sidebar-collapsed {
+      grid-template-columns: 76px 1fr;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: #fff;
+      border-right: 1px solid var(--line);
+      padding: 24px 14px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      transition: padding .22s ease;
+      overflow: hidden;
+    }
+
+    .app.sidebar-collapsed .sidebar {
+      padding: 24px 10px 20px;
+    }
+
+    .brand {
+      padding: 0 24px 26px;
+      color: var(--red);
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      white-space: nowrap;
+      transition: padding .22s ease, font-size .22s ease;
+    }
+
+    .app.sidebar-collapsed .brand {
+      padding: 0 0 26px;
+      text-align: center;
+      font-size: 24px;
+    }
+
+    .app.sidebar-collapsed .brand::before { content: "И"; }
+    .app.sidebar-collapsed .brand { font-size: 0; }
+    .app.sidebar-collapsed .brand::before { font-size: 24px; }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .nav-item {
+      height: 44px;
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      align-items: center;
+      gap: 14px;
+      padding: 0 14px;
+      border-radius: 8px;
+      color: #263044;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: grid-template-columns .22s ease, padding .22s ease, gap .22s ease;
+    }
+
+    .app.sidebar-collapsed .nav-item {
+      grid-template-columns: 24px;
+      justify-content: center;
+      gap: 0;
+      padding: 0;
+    }
+
+    .app.sidebar-collapsed .nav-item span {
+      width: 0;
+      opacity: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .nav-item svg, .icon {
+      width: 22px;
+      height: 22px;
+      stroke-width: 1.9;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      color: #39445a;
+    }
+
+    .nav-item.active {
+      background: #ffe9ea;
+      color: var(--red);
+      font-weight: 700;
+    }
+
+    .nav-item.active svg { color: var(--red); }
+
+    .collapse {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 14px;
+      color: #434b5d;
+      font-weight: 500;
+      height: 44px;
+      border: 0;
+      background: transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      font: inherit;
+      white-space: nowrap;
+      transition: background .18s ease, padding .22s ease, justify-content .22s ease;
+    }
+
+    .collapse:hover { background: #f6f7fa; }
+
+    .app.sidebar-collapsed .collapse {
+      justify-content: center;
+      padding: 0;
+      gap: 0;
+    }
+
+    .app.sidebar-collapsed .collapse span:last-child {
+      width: 0;
+      opacity: 0;
+      overflow: hidden;
+    }
+
+    .collapse .circle {
+      width: 22px;
+      height: 22px;
+      border: 1.5px solid #8790a3;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      transition: transform .22s ease;
+      flex: 0 0 auto;
+    }
+
+    .app.sidebar-collapsed .collapse .circle {
+      transform: rotate(180deg);
+    }
+
+    /* Main */
+    .main {
+      display: grid;
+      grid-template-rows: 58px 1fr;
+      min-width: 0;
+      height: var(--canvas-h);
+    }
+
+    .topbar {
+      height: 58px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+    }
+
+    .title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.035em;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .bell, .help {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: 25px;
+      height: 25px;
+      color: #233047;
+    }
+
+    .bell svg, .help svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+    .badge {
+      position: absolute;
+      top: -7px;
+      right: -6px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: var(--red);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      border: 2px solid #fff;
+    }
+
+    .profile {
+      display: grid;
+      grid-template-columns: 38px auto;
+      gap: 10px;
+      align-items: center;
+      margin-left: 4px;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #ffe4e5;
+      color: var(--red);
+      font-weight: 800;
+      display: grid;
+      place-items: center;
+    }
+
+    .profile-name { font-weight: 800; line-height: 1.1; }
+    .profile-role { color: var(--muted); font-size: 12px; margin-top: 2px; }
+
+    .workspace {
+      position: relative;
+      height: calc(var(--canvas-h) - 58px);
+      padding: 18px 24px 86px 22px;
+      overflow: hidden;
+    }
+
+    .stepper {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 26px;
+      margin-bottom: 14px;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #6b7384;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .step::after {
+      content: "";
+      width: 76px;
+      height: 1px;
+      background: #cfd5df;
+      margin-left: 8px;
+    }
+
+    .step:last-child::after { display: none; }
+
+    .step-num {
+      width: 29px;
+      height: 29px;
+      border-radius: 50%;
+      border: 1px solid #c7ceda;
+      display: grid;
+      place-items: center;
+      color: #657083;
+      background: #fff;
+      font-weight: 700;
+    }
+
+    .step.done .step-num {
+      background: var(--green);
+      color: #fff;
+      border-color: var(--green);
+      font-size: 0;
+    }
+
+    .step.done .step-num::before { content: "✓"; font-size: 16px; }
+    .step.done { color: #384155; }
+
+    .step.active { color: var(--red); }
+    .step.active .step-num {
+      background: var(--red);
+      border-color: var(--red);
+      color: #fff;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) var(--preview);
+      gap: 18px;
+      height: 814px;
+      min-height: 0;
+    }
+
+    .left-col {
+      display: grid;
+      grid-template-rows: 70px 500px 220px;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .right-col {
+      display: grid;
+      grid-template-rows: 656px 146px;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line-dark);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .status-card {
+      display: grid;
+      grid-template-columns: 190px repeat(5, 1fr) 78px;
+      align-items: center;
+      padding: 12px 15px;
+      gap: 18px;
+    }
+
+    .status-main {
+      display: grid;
+      grid-template-columns: 37px 1fr;
+      gap: 10px;
+      align-items: center;
+      border-right: 1px solid var(--line-dark);
+      min-width: 0;
+    }
+
+    .big-check {
+      width: 31px;
+      height: 31px;
+      border: 2px solid var(--green);
+      border-radius: 50%;
+      color: var(--green);
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .status-title { font-weight: 800; }
+    .status-sub { color: #7b8494; font-size: 12px; margin-top: 2px; }
+
+    .meta-label { color: #6d7688; font-size: 12px; margin-bottom: 4px; }
+    .meta-value { font-weight: 800; }
+
+    .edit-btn {
+      height: 30px;
+      border: 1px solid #f1b8bd;
+      background: #fff7f8;
+      color: var(--red);
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 750;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 0 10px;
+      box-shadow: 0 1px 2px rgba(227, 6, 19, 0.04);
+    }
+
+    .edit-btn:hover {
+      background: #fff0f1;
+      border-color: #ee9ca3;
+    }
+
+    .work-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 305px;
+      gap: 12px;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      overflow: visible;
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid var(--line-dark);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-pad { padding: 11px 13px; }
+
+    .panel-title {
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 10px;
+      letter-spacing: -0.03em;
+    }
+
+    .search-line {
+      height: 43px;
+      border: 1px solid #d5dae4;
+      border-radius: 7px;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      padding: 0 10px 0 14px;
+      background: #fff;
+      color: #798294;
+      gap: 8px;
+    }
+
+    .search-text { font-weight: 500; }
+
+    .chips-inline { display: flex; gap: 8px; align-items: center; }
+    .chip {
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+      background: #f1f3f7;
+      border-radius: 7px;
+      color: #273043;
+      font-weight: 700;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .chip .x { color: #5c6475; font-size: 16px; line-height: 1; }
+
+    .search-icons {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #70798a;
+    }
+
+    .hint {
+      color: #737d90;
+      font-size: 11px;
+      margin-top: 7px;
+      margin-bottom: 12px;
+    }
+
+    .quick-title {
+      font-size: 11px;
+      color: #222a3a;
+      font-weight: 800;
+      margin-bottom: 7px;
+    }
+
+    .quick-row { display: flex; gap: 8px; margin-bottom: 10px; }
+
+    .quick {
+      height: 31px;
+      min-width: 50px;
+      padding: 0 14px;
+      border: 1px solid #d8dee8;
+      background: #fff;
+      border-radius: 6px;
+      font-weight: 700;
+      color: #222b3d;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+    }
+
+    .quick.big { min-width: 132px; }
+    .quick.more { min-width: 38px; font-size: 17px; }
+
+    .products-box {
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .box-head {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .box-head-title { font-weight: 800; font-size: 15px; }
+    .box-head-title span { color: #737d90; font-weight: 600; font-size: 12px; margin-left: 9px; }
+
+    .product-card { padding: 13px 14px 15px; }
+
+    .product-top {
+      display: grid;
+      grid-template-columns: 26px auto 1fr auto;
+      align-items: center;
+      gap: 13px;
+      margin-bottom: 10px;
+    }
+
+    .check-square {
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      display: grid;
+      place-items: center;
+      background: var(--red);
+      color: #fff;
+      font-weight: 900;
+    }
+
+    .product-name { font-size: 21px; font-weight: 850; }
+
+    .purple-chip {
+      justify-self: start;
+      height: 22px;
+      padding: 0 9px;
+      border-radius: 6px;
+      color: #763cc8;
+      background: #eee1ff;
+      display: flex;
+      align-items: center;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .product-actions { display: flex; gap: 16px; color: #394254; align-items: center; }
+    .product-actions svg { width: 20px; height: 20px; }
+
+    .param-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 12px;
+    }
+
+    .param-table th {
+      height: 34px;
+      background: #f5f6f8;
+      text-align: left;
+      color: #2e3546;
+      padding: 0 14px;
+      font-weight: 800;
+    }
+
+    .param-table td {
+      height: 35px;
+      border-top: 1px solid var(--line);
+      padding: 0 14px;
+      color: #343b4d;
+    }
+
+    .param-table td:first-child { width: 250px; }
+    .param-table td:nth-child(2) { width: 300px; }
+    .drag { color: #9aa3b3; font-size: 16px; margin-right: 10px; }
+
+    .select-like {
+      height: 27px;
+      border: 1px solid #d9dee8;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 9px;
+      background: #fff;
+      width: 248px;
+      color: #202838;
+    }
+
+    .product-table-card { padding: 8px 10px 10px; }
+
+    .table-product-header {
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr) auto auto;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 7px;
+    }
+
+    .table-product-main { min-width: 0; }
+    .table-product-title { font-size: 17px; line-height: 1.08; font-weight: 900; color: #171d2b; }
+    .table-product-title span { font-size: 12px; font-weight: 700; color: #5f6878; margin-left: 6px; }
+    .table-product-sub { margin-top: 2px; color: #7a8394; font-size: 11px; }
+    .table-product-sub b { color: #2b3344; }
+
+    .product-params-scroll {
+      max-height: 230px;
+      overflow-y: scroll;
+      padding-right: 5px;
+      scrollbar-width: thin;
+      scrollbar-color: #c8ced9 #f2f4f7;
+    }
+
+    .product-params-scroll::-webkit-scrollbar { width: 8px; }
+    .product-params-scroll::-webkit-scrollbar-track { background: #f2f4f7; border-radius: 999px; }
+    .product-params-scroll::-webkit-scrollbar-thumb { background: #c8ced9; border-radius: 999px; }
+    .product-params-scroll::-webkit-scrollbar-thumb:hover { background: #aeb6c4; }
+
+    .updated-param-table {
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: separate;
+      border-spacing: 0;
+      border: 1px solid #dfe4ed;
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 11px;
+      line-height: 1.22;
+      background: #fff;
+    }
+
+    .updated-param-table th {
+      height: 28px;
+      background: #f6f7fa;
+      border-bottom: 1px solid #dfe4ed;
+      color: #2b3344;
+      text-align: left;
+      padding: 0 8px;
+      font-weight: 850;
+      white-space: normal;
+    }
+
+    .updated-param-table td {
+      min-height: 32px;
+      height: auto;
+      border-bottom: 1px solid #eef1f5;
+      padding: 4px 8px;
+      color: #333b4d;
+      vertical-align: middle;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .updated-param-table tr:last-child td { border-bottom: 0; }
+    .updated-param-table th:first-child,
+    .updated-param-table td:first-child { width: 185px; }
+    .updated-param-table th:nth-child(2),
+    .updated-param-table td:nth-child(2) { width: 245px; }
+    .updated-param-table td:nth-child(3) { color: #667082; }
+
+    .value-pill,
+    .value-select {
+      min-height: 26px;
+      border: 1px solid #dbe1ea;
+      border-radius: 6px;
+      background: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 7px;
+      padding: 3px 8px;
+      font-weight: 800;
+      color: #1f2737;
+      width: 100%;
+      line-height: 1.15;
+      white-space: normal;
+    }
+
+    .plain-value {
+      color: #1f2737;
+      font-size: 11px;
+      font-weight: 800;
+      background: #fff;
+      border-color: #dbe1ea;
+    }
+
+    .value-select span { color: #737d8e; font-weight: 900; }
+
+    .value-select.placeholder {
+      color: #8a93a4;
+      font-weight: 700;
+    }
+
+    .add-product {
+      margin-top: 11px;
+      height: 33px;
+      border: 1px solid #d8dee8;
+      border-radius: 6px;
+      background: #fff;
+      padding: 0 14px;
+      font-weight: 700;
+      color: #394254;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .add-inline {
+      height: 30px;
+      padding: 0 12px;
+      border-radius: 6px;
+      border: 1px solid #e2e6ee;
+      background: #fff;
+      color: #30384a;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .product-card-new { padding: 13px 14px 14px; }
+
+    .product-header-new {
+      display: grid;
+      grid-template-columns: 28px 1fr auto auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid #edf0f5;
+      border-radius: 9px;
+      background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+    }
+
+    .product-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: var(--red);
+      color: #fff;
+      font-weight: 900;
+    }
+
+    .product-title-area { min-width: 0; }
+    .product-title-line { font-size: 18px; font-weight: 900; color: #171d2b; line-height: 1.1; }
+    .product-title-line span { font-size: 13px; font-weight: 700; color: #5e6778; margin-left: 7px; }
+    .product-found { margin-top: 5px; color: #7a8394; font-size: 12px; }
+    .product-found b { color: #2b3344; }
+
+    .product-state {
+      height: 26px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: #efe4ff;
+      color: #6f35bd;
+      display: inline-flex;
+      align-items: center;
+      font-weight: 800;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .product-actions.compact { gap: 9px; color: #475165; }
+    .product-actions.compact svg { width: 17px; height: 17px; }
+
+    .config-grid-new {
+      display: grid;
+      grid-template-columns: 1.05fr 1.55fr 1fr 1.35fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .config-field {
+      min-height: 64px;
+      border: 1px solid #e2e7ef;
+      border-radius: 9px;
+      background: #fff;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .config-field.primary {
+      border-color: #ffd6d9;
+      background: #fff7f7;
+    }
+
+    .field-label {
+      color: #7c8595;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+      margin-bottom: 7px;
+    }
+
+    .field-value {
+      color: #1d2433;
+      font-weight: 800;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .field-value.strong { color: var(--red); font-size: 20px; line-height: 1; justify-content: flex-start; }
+    .field-value.strong span { color: #6c7485; font-size: 12px; font-weight: 800; margin-left: 2px; }
+
+    .product-summary-new {
+      display: flex;
+      gap: 9px;
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 9px;
+      background: #f7f8fb;
+      border: 1px solid #edf0f5;
+    }
+
+    .summary-chip-new {
+      height: 30px;
+      padding: 0 12px;
+      border-radius: 7px;
+      background: #fff;
+      border: 1px solid #dfe4ed;
+      color: #3b4456;
+      font-size: 12px;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    .summary-chip-new.active { background: var(--red); color: #fff; border-color: var(--red); }
+    .summary-chip-new.muted { color: #747d8d; }
+
+    .product-note-new {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 9px;
+      align-items: start;
+      color: #626c7d;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .note-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #fff2d9;
+      color: #a05a00;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 12px;
+    }
+
+    .summary-panel { padding: 16px 16px; }
+    .summary-title { font-size: 17px; font-weight: 850; margin-bottom: 18px; }
+    .summary-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 16px;
+      font-size: 13px;
+    }
+    .summary-row .sum { font-weight: 900; font-size: 15px; white-space: nowrap; }
+    .summary-row .red { color: var(--red); }
+    .summary-divider { height: 1px; background: var(--line); margin: 12px 0 18px; }
+    .summary-text { color: #596275; line-height: 1.45; margin-bottom: 16px; font-size: 13px; }
+
+    .bottom-panels {
+      display: block;
+      height: 220px;
+    }
+
+    .structure-panel { height: 280px; padding: 11px 14px 10px; }
+    .sub-title { font-size: 16px; font-weight: 850; margin-bottom: 3px; }
+    .structure-subtitle {
+      color: #747d8d;
+      font-size: 11px;
+      margin-bottom: 7px;
+    }
+
+    .structure-scroll {
+      height: 230px;
+      overflow-y: auto;
+      padding-right: 5px;
+      scrollbar-width: thin;
+      scrollbar-color: #c8ced9 #f2f4f7;
+    }
+
+    .structure-scroll::-webkit-scrollbar { width: 8px; }
+    .structure-scroll::-webkit-scrollbar-track { background: #f2f4f7; border-radius: 999px; }
+    .structure-scroll::-webkit-scrollbar-thumb { background: #c8ced9; border-radius: 999px; }
+    .structure-scroll::-webkit-scrollbar-thumb:hover { background: #aeb6c4; }
+
+    .structure-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .structure-table td {
+      height: 30px;
+      border-top: 1px solid var(--line);
+      padding: 4px 10px;
+      color: #2f3748;
+      vertical-align: middle;
+    }
+
+    .structure-table tr:first-child td { border-top: 0; }
+    .section-num { width: 34px; color: #5d6677; font-weight: 800; text-align: center; }
+    .structure-main { display: grid; grid-template-columns: 220px 1fr; gap: 10px; align-items: center; }
+    .structure-main strong { font-weight: 800; color: #202737; }
+    .structure-main span { color: #626c7d; }
+    .status-pill {
+      width: 92px;
+      height: 22px;
+      border-radius: 999px;
+      display: inline-grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 800;
+      justify-self: end;
+    }
+    .status-pill.on { color: #168a45; background: #e9f8ef; }
+    .status-pill.warn { color: #b45309; background: #fff4df; }
+
+    /* Preview */
+    .preview-card {
+      padding: 14px 14px 16px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .preview-head {
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .preview-title { font-size: 18px; font-weight: 850; }
+
+    .full-btn {
+      height: 32px;
+      border: 1px solid #d9dee8;
+      border-radius: 6px;
+      background: #fff;
+      color: #40495a;
+      padding: 0 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .paper-wrap {
+      flex: 1;
+      min-height: 0;
+      border: 1px solid #d6dbe5;
+      border-radius: 6px;
+      background: #fdfdfd;
+      padding: 18px 22px;
+      overflow: hidden;
+    }
+
+    .paper {
+      width: 100%;
+      height: 100%;
+      background: #fff;
+      font-family: "Times New Roman", Times, serif;
+      color: #111;
+      font-size: 11px;
+      line-height: 1.25;
+      padding: 0 4px;
+      position: relative;
+    }
+
+    .paper-header {
+      text-align: center;
+      font-size: 10px;
+      line-height: 1.25;
+      padding-top: 7px;
+      margin-bottom: 16px;
+    }
+
+    .red-line {
+      height: 3px;
+      background: var(--red);
+      margin: 0 6px 18px;
+    }
+
+    .doc-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      align-items: center;
+      font-weight: 700;
+      margin: 0 12px 28px;
+      font-size: 11px;
+    }
+    .doc-meta div:nth-child(2) { text-align: center; }
+    .doc-meta div:nth-child(3) { text-align: right; }
+
+    .doc-title {
+      text-align: center;
+      font-weight: 800;
+      font-size: 16px;
+      margin: 0 0 18px;
+    }
+
+    .doc-text {
+      margin: 0 16px 14px;
+      text-align: left;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .calc-heading {
+      margin: 0 16px 12px;
+      font-size: 11px;
+      font-weight: 800;
+      text-decoration: underline;
+    }
+
+    .doc-table-title {
+      margin: 0 16px 7px;
+      font-weight: 800;
+      font-size: 11px;
+    }
+
+    .doc-table {
+      width: calc(100% - 32px);
+      margin: 0 16px 9px;
+      border-collapse: collapse;
+      font-size: 9px;
+      line-height: 1.18;
+    }
+
+    .doc-table th, .doc-table td {
+      border: 1px solid #222;
+      padding: 5px 4px;
+      vertical-align: top;
+    }
+
+    .doc-table th {
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .doc-table td:nth-child(1), .doc-table td:nth-child(2), .doc-table td:nth-child(4), .doc-table td:nth-child(5), .doc-table td:nth-child(6) { text-align: center; }
+    .doc-table .total td { font-weight: 800; text-align: right; }
+    .doc-table .total td:last-child { text-align: center; }
+
+    .doc-note { margin: 0 16px 16px; font-size: 9px; font-weight: 700; }
+    .ellipsis { text-align: center; color: #555; font-size: 18px; margin-top: 12px; }
+
+    .export-card { padding: 16px 18px; }
+    .export-title { font-size: 18px; font-weight: 850; margin-bottom: 5px; }
+    .export-sub { color: #6e7788; font-size: 12px; margin-bottom: 18px; }
+    .export-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .export-btn {
+      height: 54px;
+      border: 1px solid var(--red);
+      color: var(--red);
+      background: #fff;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 11px;
+      font-weight: 800;
+    }
+
+    .export-btn svg { width: 22px; height: 22px; }
+    .actions-bottom {
+      position: absolute;
+      right: 24px;
+      bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .bottom-btn {
+      height: 39px;
+      min-width: 146px;
+      border: 1px solid #d9dee8;
+      background: #fff;
+      color: #384255;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .bottom-btn.small { min-width: 90px; }
+    .bottom-btn.next {
+      min-width: 126px;
+      background: var(--red);
+      color: #fff;
+      border-color: var(--red);
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 13px;
+    }
+
+    /* Helper icon style */
+    .ico { display: inline-block; width: 1em; text-align: center; }
+  </style>
+</head>
+<body>
+  <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.8 12 3l9 7.8"/><path d="M5.5 10.5V21h5.2v-6.2h2.6V21h5.2V10.5"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M6.5 3.5h7.8l3.2 3.4v13.6h-11z"/><path d="M14 3.5V7h3.5"/><path d="M9 11h6M9 14h6M9 17h4"/></symbol>
+    <symbol id="i-files" viewBox="0 0 24 24"><path d="M8 4h8l3 3v13H8z"/><path d="M16 4v4h3"/><path d="M5 7v13h3"/><path d="M11 12h5M11 15h5"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="M12 3 21 8l-9 5-9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></symbol>
+    <symbol id="i-template" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+    <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8.5a6 6 0 0 0-12 0c0 6.7-2.5 7.4-2.5 8.9h17c0-1.5-2.5-2.2-2.5-8.9"/><path d="M14.2 20a2.4 2.4 0 0 1-4.4 0"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2A2.7 2.7 0 0 1 12.1 7c1.6 0 2.9 1 2.9 2.5 0 1.9-2 2.1-2.7 3.5"/><path d="M12 17.2h.01"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.3-4.3"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><rect x="4" y="4" width="12" height="12" rx="2"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M9 6V4h6v2"/><path d="m18 6-.8 14H6.8L6 6"/><path d="M10 10v6M14 10v6"/></symbol>
+    <symbol id="i-docx" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h4"/><path d="m8.4 12 1.1 5 1.5-4.2 1.5 4.2 1.1-5"/></symbol>
+    <symbol id="i-pdf" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h4"/><path d="M8.5 16h7M8.5 12.5h7"/></symbol>
+  </svg>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">Индид</div>
+      <nav class="nav">
+        <div class="nav-item">
+          <svg class="icon"><use href="#i-home"/></svg>
+          <span>Главная</span>
+        </div>
+        <div class="nav-item active">
+          <svg class="icon"><use href="#i-file"/></svg>
+          <span>Конструктор КП</span>
+        </div>
+        <div class="nav-item">
+          <svg class="icon"><use href="#i-file"/></svg>
+          <span>Мои КП</span>
+        </div>
+        <div class="nav-item">
+          <svg class="icon"><use href="#i-files"/></svg>
+          <span>Все КП</span>
+        </div>
+        <div class="nav-item">
+          <svg class="icon"><use href="#i-box"/></svg>
+          <span>Продукты</span>
+        </div>
+        <div class="nav-item">
+          <svg class="icon"><use href="#i-template"/></svg>
+          <span>Шаблоны КП</span>
+        </div>
+        <div class="nav-item">
+          <svg class="icon"><use href="#i-database"/></svg>
+          <span>Справочники</span>
+        </div>
+      </nav>
+      <button class="collapse" id="toggleSidebar" type="button" aria-expanded="true" aria-label="Свернуть меню"><span class="circle">‹</span><span>Свернуть меню</span></button>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="title">Конструктор КП</div>
+        <div class="top-actions">
+          <div class="bell">
+            <svg class="icon"><use href="#i-bell"/></svg>
+            <span class="badge">3</span>
+          </div>
+          <div class="help"><svg class="icon"><use href="#i-help"/></svg></div>
+          <div class="profile">
+            <div class="avatar">ИК</div>
+            <div><div class="profile-name">Иванов И.И.</div><div class="profile-role">Менеджер</div></div>
+          </div>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <div class="stepper">
+          <div class="step done"><div class="step-num">1</div><span>Данные КП</span></div>
+          <div class="step active"><div class="step-num">2</div><span>Продукты и конфигурация</span></div>
+          <div class="step"><div class="step-num">3</div><span>Параметры и расчёты</span></div>
+          <div class="step"><div class="step-num">4</div><span>Предпросмотр и экспорт</span></div>
+        </div>
+
+        <div class="grid">
+          <div class="left-col">
+            <div class="card status-card">
+              <div class="status-main">
+                <div class="big-check">✓</div>
+                <div><div class="status-title">Шаг 1 завершён.</div><div class="status-sub">Данные КП сохранены.</div></div>
+              </div>
+              <div><div class="meta-label">КП</div><div class="meta-value">КП-2026-0123</div></div>
+              <div><div class="meta-label">Дата</div><div class="meta-value">07.05.2026</div></div>
+              <div><div class="meta-label">Заказчик</div><div class="meta-value">ООО «Ромашка»</div></div>
+              <div><div class="meta-label">Менеджер</div><div class="meta-value">Иванов И.И.</div></div>
+              <div><div class="meta-label">Срок действия предложения</div><div class="meta-value">30 дней</div></div>
+              <button class="edit-btn"><span class="edit-icon">✎</span>Изменить</button>
+            </div>
+
+            <div class="work-card">
+              <div class="panel panel-pad">
+                <div class="panel-title">Продукты и конфигурация</div>
+                <div class="search-line">
+                  <div class="search-text">Введите ключевые слова продуктов, опций и параметров</div>
+                  <div class="chips-inline"><span class="chip">pam25 <span class="x">×</span></span><span class="chip">fstec <span class="x">×</span></span></div>
+                  <div class="search-icons"><span>×</span><svg class="icon" style="width:18px;height:18px"><use href="#i-search"/></svg></div>
+                </div>
+                <div class="hint">Примеры: PAM25 FSTEC, AM WL RDP LDAP SSO 150, AAPM 50</div>
+                <div class="quick-title">Популярные продукты и опции</div>
+                <div class="quick-row">
+                  <div class="quick">PAM</div><div class="quick">FSTEC</div><div class="quick big">25 пользователей</div><div class="quick">AM</div><div class="quick">WL</div><div class="quick">ADFS</div><div class="quick">AAPM</div><div class="quick more">...</div>
+                </div>
+                <div class="products-box products-box-table">
+                  <div class="box-head">
+                    <div class="box-head-title">Определённые продукты <span>1 продукт</span></div>
+                    <button class="add-inline">＋ Добавить</button>
+                  </div>
+                  <div class="product-card product-table-card">
+                    <div class="table-product-header">
+                      <div class="check-square">✓</div>
+                      <div class="table-product-main">
+                        <div class="table-product-title">PAM <span>Indeed Privileged Access Manager</span></div>
+                      </div>
+                      <div class="purple-chip">Сертифицированная версия (ФСТЭК)</div>
+                      <div class="product-actions compact">
+                        <svg class="icon"><use href="#i-info"/></svg>
+                        <svg class="icon"><use href="#i-copy"/></svg>
+                        <svg class="icon"><use href="#i-trash"/></svg>
+                      </div>
+                    </div>
+
+                    <div class="product-params-scroll">
+                    <table class="updated-param-table">
+                      <thead>
+                        <tr>
+                          <th>Параметр</th>
+                          <th>Значение</th>
+                          <th>Как попадёт в КП</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><strong>Количество пользователей</strong></td>
+                          <td><div class="value-select plain-value">25 пользов.</div></td>
+                          <td>Используется в заголовке расчёта и подборе артикула</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Версия / редакция</strong></td>
+                          <td><div class="value-select">Сертифицированная версия (ФСТЭК) <span>⌄</span></div></td>
+                          <td>Добавляет ФСТЭК-комплект и примечание по НДС</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Период</strong></td>
+                          <td><div class="value-select">12 месяцев <span>⌄</span></div></td>
+                          <td>Формирует таблицу срочных лицензий на 1 год</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Тип лицензии</strong></td>
+                          <td><div class="value-select">Пользовательская лицензия (UL) <span>⌄</span></div></td>
+                          <td>Определяет текст позиции и единицу расчёта</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Дополнительные опции</strong></td>
+                          <td><div class="value-select placeholder">Не выбраны <span>⌄</span></div></td>
+                          <td>Добавляются отдельными позициями, если предусмотрены шаблоном</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel summary-panel">
+                <div class="summary-title">Итого по продуктам</div>
+                <div class="summary-row"><div>Таблица 1 (срочные лицензии)</div><div class="sum">1 514 690 ₽</div></div>
+                <div class="summary-row"><div>Таблица 2 (бессрочные лицензии)</div><div class="sum">2 839 130 ₽</div></div>
+                <div class="summary-row"><div>НДС</div><div class="sum red">не облагается</div></div>
+                <div class="summary-divider"></div>
+                <div class="summary-text">Итоговые суммы в КП приводятся по каждой таблице отдельно.</div>
+                <div class="summary-text">ФСТЭК-комплект указывается отдельной строкой; НДС отражается в примечании.</div>
+              </div>
+            </div>
+
+            <div class="bottom-panels">
+              <div class="panel structure-panel">
+                <div class="sub-title">Структура КП и расчёты</div>
+                <div class="structure-subtitle">Проверьте, какие разделы попадут в Word-файл и как будут сформированы таблицы расчёта.</div>
+                <div class="structure-scroll">
+                  <table class="structure-table">
+                  <tbody>
+                    <tr>
+                      <td class="section-num">1</td>
+                      <td class="structure-main"><strong>Коммерческое предложение</strong><span>Вводный текст, заказчик, номер КП, дата и срок действия предложения — 30 дней.</span></td>
+                    </tr>
+                    <tr>
+                      <td class="section-num">2</td>
+                      <td class="structure-main"><strong>Расчёт стоимости</strong><span>Таблица 1 — срочные лицензии на 1 год; Таблица 2 — бессрочные лицензии.</span></td>
+                    </tr>
+                    <tr>
+                      <td class="section-num">3</td>
+                      <td class="structure-main"><strong>ФСТЭК-комплект</strong><span>Указывается отдельной строкой в таблице; НДС отражается в примечании.</span></td>
+                    </tr>
+                    <tr>
+                      <td class="section-num">4</td>
+                      <td class="structure-main"><strong>Описание продуктов</strong><span>Краткое описание Indeed PAM и выбранной редакции добавляется из шаблона.</span></td>
+                    </tr>
+                    <tr>
+                      <td class="section-num">5</td>
+                      <td class="structure-main"><strong>Гарантийное обслуживание и подпись</strong><span>Стандартный блок поддержки Indeed и финальный блок подписи ответственного.</span></td>
+                    </tr>
+                    <tr>
+                      <td class="section-num">6</td>
+                      <td class="structure-main"><strong>Примечания по НДС</strong><span>Для текущего расчёта: НДС не облагается; ФСТЭК-комплект проверяется отдельно.</span></td>
+                    </tr>
+                    <tr>
+                      <td class="section-num">7</td>
+                      <td class="structure-main"><strong>Срок действия КП</strong><span>Предложение действительно в течение 30 календарных дней.</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="right-col">
+            <div class="card preview-card">
+              <div class="preview-head">
+                <div class="preview-title">Предпросмотр КП</div>
+                <button class="full-btn">На весь экран ↗</button>
+              </div>
+              <div class="paper-wrap">
+                <div class="paper">
+                  <div class="paper-header">
+                    <strong>Общество с ограниченной ответственностью «Индид» (ООО «Индид»)</strong><br>
+                    191186, г. Санкт-Петербург, вн.тер.г. Муниципальный округ Дворцовый округ,<br>
+                    ул. Итальянская, д. 17, литера А, помещ. 1НC<br>
+                    ИНН 7801540219 | ОГРН 1117847053103 | КПП 784001001
+                  </div>
+                  <div class="red-line"></div>
+                  <div class="doc-meta"><div>Исх. 123</div><div>от 07.05.2026 г.</div><div>ООО «Ромашка»</div></div>
+                  <div class="doc-title">Коммерческое предложение</div>
+                  <p class="doc-text">Компания «Индид» предлагает Вашему вниманию предварительный расчёт стоимости системы Indeed по контролю привилегированных пользователей. Данное предложение действительно в течение 30 дней.</p>
+                  <div class="calc-heading">Расчет стоимости Indeed PAM на 25 пользователей сертифицированная версия:</div>
+                  <div class="doc-table-title">Таблица 1. Расчет РРЦ срочных лицензий на 1 год*</div>
+                  <table class="doc-table">
+                    <thead><tr><th>№</th><th>Артикул</th><th>Позиция</th><th>Кол-во,<br>шт.</th><th>Цена,<br>руб. РФ</th><th>Стоимость,<br>руб. РФ</th></tr></thead>
+                    <tbody>
+                      <tr>
+                        <td>1</td><td>PAM-01120025</td><td>Неисключительные права на программу для ЭВМ Indeed Privileged Access Manager (пакет на - 25 пользователей) на 1 (один) год</td><td>1</td><td>1 514 690,00</td><td>1 514 690,00</td>
+                      </tr>
+                      <tr><td>2</td><td>PAM-FSTEC-KIT</td><td>ФСТЭК-комплект</td><td>1</td><td>—</td><td>—</td></tr>
+                      <tr class="total"><td colspan="5">Итого</td><td>1 514 690,00</td></tr>
+                    </tbody>
+                  </table>
+                  <p class="doc-note">*В стоимость лицензий включена гарантия на ПО и доступ к обновлениям в течение срока действия лицензии. НДС не облагается.</p>
+                  <div class="doc-table-title">Таблица 2. Расчет РРЦ бессрочных лицензий**</div>
+                  <table class="doc-table"><thead><tr><th>№</th><th>Артикул</th><th>Позиция</th><th>Кол-во,<br>шт.</th><th>Цена,<br>руб. РФ</th><th>Стоимость,<br>руб. РФ</th></tr></thead></table>
+                  <div class="ellipsis">...</div>
+                </div>
+              </div>
+            </div>
+            <div class="card export-card">
+              <div class="export-title">Экспорт КП</div>
+              <div class="export-sub">Файл Word содержит полную редактируемую версию документа.</div>
+              <div class="export-row">
+                <button class="export-btn"><svg class="icon"><use href="#i-docx"/></svg>Скачать КП в Word (.docx)</button>
+                <button class="export-btn"><svg class="icon"><use href="#i-pdf"/></svg>Скачать КП в PDF</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="actions-bottom">
+          <button class="bottom-btn">Сохранить черновик</button>
+          <button class="bottom-btn small">Назад</button>
+          <button class="bottom-btn next">Далее <span>→</span></button>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script>
+    const app = document.querySelector('.app');
+    const toggleSidebar = document.getElementById('toggleSidebar');
+
+    toggleSidebar.addEventListener('click', () => {
+      const isCollapsed = app.classList.toggle('sidebar-collapsed');
+      toggleSidebar.setAttribute('aria-expanded', String(!isCollapsed));
+      toggleSidebar.setAttribute('aria-label', isCollapsed ? 'Развернуть меню' : 'Свернуть меню');
+      toggleSidebar.querySelector('span:last-child').textContent = isCollapsed ? 'Развернуть меню' : 'Свернуть меню';
+    });
+  </script>
+</body>
+</html>
