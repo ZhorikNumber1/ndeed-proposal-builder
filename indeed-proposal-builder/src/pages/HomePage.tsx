@@ -53,7 +53,7 @@ export function HomePage() {
   };
 
   const openExample = async () => {
-    const draft = await draftCollectionRepository.create(createDemoProposal(), 'Демо-пример');
+    const draft = await draftCollectionRepository.create(createDemoProposal(), 'Демо-пример', 2);
     navigate(`/proposals/${draft.id}/edit`);
   };
 

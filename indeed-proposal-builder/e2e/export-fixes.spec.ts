@@ -13,18 +13,20 @@ test.describe('export freshness and PDF', () => {
       }
     });
     await page.goto('/');
-    await expect(page.locator('.title')).toHaveText('Конструктор КП');
-
-    const demo = page.getByRole('button', { name: 'Демо-пример' });
-    if (await demo.isVisible().catch(() => false)) {
-      await demo.click();
-    }
-
-    await page.getByRole('button', { name: /Изменить/ }).click();
+    await page.getByRole('button', { name: 'Открыть пример' }).click();
+    await expect(page).toHaveURL(/\/proposals\/.+\/edit/);
+    // Wait for draft hydration (demo customer appears in meta or form)
+    await expect(page.getByText(/Ромашка|PAM25|Подписка/i).first()).toBeVisible({ timeout: 15_000 });
+    const editBtn = page.getByRole('button', { name: /Изменить/ });
+    await expect(editBtn).toBeVisible({ timeout: 10_000 });
+    await editBtn.click();
+    await expect(page.getByLabel('Наименование заказчика')).toBeVisible();
     await page.getByLabel('Наименование заказчика').fill('ООО Тест аудита Fix');
     await page.getByLabel('Номер КП').fill('КП-FIX-001');
     await page.getByLabel('Дата КП').fill('2026-06-15');
+    await page.getByLabel(/Менеджер/).fill('Сидоров С.С.');
     await page.getByRole('button', { name: /^Далее/ }).click();
+    await expect(page.getByLabel('Свободный ввод запроса')).toBeVisible({ timeout: 10_000 });
 
     const input = page.getByLabel('Свободный ввод запроса');
     await input.fill('PAM 46 FSTEC');
@@ -37,7 +39,6 @@ test.describe('export freshness and PDF', () => {
     await qty.blur();
     await expect(page.locator('.summary-row .sum').first()).toContainText(/10/);
 
-    // VAT must be per-alternative (550), not summed 1100 across alternatives
     const vatText = await page.locator('.summary-panel').innerText();
     expect(vatText).toMatch(/550/);
     expect(vatText).not.toMatch(/1\s*100/);
@@ -77,8 +78,8 @@ test.describe('export freshness and PDF', () => {
     });
     await page.setViewportSize({ width: 1792, height: 1024 });
     await page.goto('/');
-    const demo = page.getByRole('button', { name: 'Демо-пример' });
-    if (await demo.isVisible().catch(() => false)) await demo.click();
+    await page.getByRole('button', { name: /пример/i }).first().click();
+    await expect(page).toHaveURL(/\/proposals\/.+\/edit/);
 
     await page.getByRole('button', { name: /Свернуть меню/ }).click();
     const collapsedW = await page.locator('.sidebar').evaluate((el) => el.getBoundingClientRect().width);

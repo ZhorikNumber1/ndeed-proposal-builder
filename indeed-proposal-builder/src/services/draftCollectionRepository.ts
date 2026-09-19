@@ -191,7 +191,7 @@ function envelopeFromLegacy(stored: StoredDraft, id: string): DraftEnvelope {
   };
 }
 
-function createEnvelope(proposal?: Proposal, title = 'Новое КП'): DraftEnvelope {
+function createEnvelope(proposal?: Proposal, title = 'Новое КП', activeStep: 1 | 2 | 3 | 4 = 1): DraftEnvelope {
   const created = nowIso();
   const base = recalcProposal(proposal ?? createEmptyProposal());
   return {
@@ -200,7 +200,7 @@ function createEnvelope(proposal?: Proposal, title = 'Новое КП'): DraftEn
     title,
     proposal: base,
     builder: {
-      activeStep: 1,
+      activeStep,
       activeOptionId: base.options[0]?.id ?? null,
     },
     revision: 1,
@@ -227,8 +227,8 @@ export function createDraftCollectionRepository(storage: DraftStorage = defaultS
       return readEnvelope(storage, id);
     },
 
-    async create(proposal?: Proposal, title = 'Новое КП'): Promise<DraftEnvelope> {
-      const draft = createEnvelope(proposal, title);
+    async create(proposal?: Proposal, title = 'Новое КП', activeStep: 1 | 2 | 3 | 4 = 1): Promise<DraftEnvelope> {
+      const draft = createEnvelope(proposal, title, activeStep);
       const ids = readIndex(storage);
       ids.unshift(draft.id);
       writeIndex(storage, ids);

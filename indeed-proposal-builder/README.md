@@ -1,6 +1,6 @@
 # Конструктор коммерческих предложений «Индид» (MVP)
 
-Фронтенд-MVP конструктора КП на **Vite + React + TypeScript**. Визуальный референс — `reference/1.html` (исходный макет из вложения `1_4223.html`).
+Фронтенд-MVP конструктора КП на **Vite + React + TypeScript**. Визуальный референс — `reference/1.html`.
 
 ## Запуск
 
@@ -12,6 +12,8 @@ npm run dev
 
 Приложение: [http://127.0.0.1:43123](http://127.0.0.1:43123)
 
+Стартовая страница — **Главная** (`/`). Конструктор открывается по адресу `/proposals/:id/edit`.
+
 ### Команды
 
 | Команда | Описание |
@@ -21,40 +23,46 @@ npm run dev
 | `npm run preview` | Превью сборки (порт 43124) |
 | `npm run typecheck` | Проверка TypeScript |
 | `npm run lint` | Oxlint |
-| `npm run test` | Vitest (парсер, расчёт, черновик, документ) |
-| `npm run test:e2e` | Playwright (если установлен браузер) |
+| `npm run test` | Vitest |
+| `npm run test:e2e` | Playwright |
+| `npm run import:articles` | Импорт справочника из Excel → `src/data/articlesCatalog.json` |
 
-## Что реализовано
+## Основной сценарий
 
-- Оболочка и 4 шага создания КП по макету HTML (sidebar, stepper, метаданные, конфигурация, итоги, структура, предпросмотр, экспорт).
-- Свободный ввод с детерминированным parser (`normalizeRequest`) и явным «Применить».
-- Произвольные количества лицензий; PAM UL/CS пакеты (`saleQuantity=1`).
-- Две независимые альтернативы (подписка / бессрочная) без суммирования итогов.
-- Локальный демо-калькулятор (`mode=demo`) по извлечённым правилам S08.
-- Единая модель документа → React preview, DOCX (`docx`), PDF (`pdfmake` + Roboto с кириллицей).
-- Черновик в `localStorage` (`indeed-proposal-builder:draft:v1`).
-- Сервисные интерфейсы для будущей замены backend/Excel.
+1. Откройте Главную → **Создать КП** (или **Открыть пример**).
+2. Заполните реквизиты → продукты → расчёты → предпросмотр.
+3. Черновик автосохраняется в этом браузере; на Главной виден список независимых КП.
+4. Вкладка **Артикулы** — справочник после импорта Excel.
+5. Предпросмотр показывает **тот же PDF**, что скачивается кнопкой экспорта.
 
-## Ограничения локального демо
+## Импорт артикулов
 
-- Расчёт **не** подключён к Excel и **не** является корпоративным прайсом.
-- Provenance: `price-calculator NEW.xlsx`, sha256 `d1fcd56c…09435`, `mode=demo`.
-- Не реализованы или частично: PAM RL, CM Мультиплатформа, доп. годы поддержки, годовая WL, ряд PAM-модулей (AAPM/SQL Proxy) — честный `needs_rule` / «Требуется уточнение».
-- SKU только из наблюдаемого справочника; коды для 46/77 пользователей **не** генерируются.
-- Профиль поставщика и сертификат №4667 — демонстрационные исторические данные.
-- Экспорт помечен как **демонстрационный черновик**.
+Положите файл `артикулы_09.04.2026 копия.xlsx` в `reference/` или `uploads/` и выполните:
 
-## Точки подключения backend
+```bash
+npm run import:articles
+```
 
-Замените реализации в `src/services/` без переписывания UI:
+Скрипт пишет:
 
-- `CalculatorService` ← `demoCalculator.ts`
-- `CatalogService` / `resolveSku` ← `catalogService.ts`
-- `DraftRepository` ← `localDraftRepository.ts`
-- `ExportService` ← `docxExporter.ts` / `pdfExporter.ts`
+- `src/data/articlesCatalog.json` — нормализованные записи;
+- `src/data/articlesImportReport.json` — сводка, конфликты, неоднозначности.
 
-Данные каталога и текстов: `src/data/*`.
+Без Excel полный импорт **не выполняется** (не подменяется выдуманными данными). Для подбора PAM UL25 используются контрольные seeds (`articleControlSeeds.json`) до появления полного каталога.
+
+## Хранение черновиков
+
+- Коллекция: `indeed-proposal-builder:drafts:index:v2` + `…:item:v2:{id}`
+- Legacy одиночный ключ `indeed-proposal-builder:draft:v1` мигрирует один раз без потери данных
+- Данные локальны для браузера/origin; серверной синхронизации нет
+
+## Ограничения локального MVP
+
+- Расчёт `mode=demo`, не live Excel/корпоративный прайс
+- Полный справочник артикулов требует приложенного Excel
+- PAM 46/77 считаются, но SKU не выдумываются
+- Нет авторизации, общего реестра сотрудников и backend
 
 ## Структура
 
-См. `src/app`, `src/domain`, `src/features`, `src/services`, `src/data`, `reference/1.html`.
+`src/app` · `src/pages` · `src/domain` · `src/features` · `src/services` · `src/data` · `scripts/importArticles.mts`

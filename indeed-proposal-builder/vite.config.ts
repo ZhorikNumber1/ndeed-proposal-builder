@@ -13,6 +13,9 @@ export default defineConfig({
     port: 43124,
     strictPort: true,
   },
+  optimizeDeps: {
+    include: ['pdfjs-dist'],
+  },
   test: {
     environment: 'jsdom',
     globals: true,
