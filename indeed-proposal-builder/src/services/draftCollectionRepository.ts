@@ -131,12 +131,25 @@ function toSummary(draft: DraftEnvelope): DraftSummary {
   };
 }
 
-function recalcProposal(proposal: Proposal): Proposal {
+function normalizeProposalCustomer(proposal: Proposal): Proposal {
   return {
     ...proposal,
-    options: proposal.options.map((opt, idx) => ({
+    customer: {
+      legalName: proposal.customer.legalName ?? '',
+      // Older drafts lack articleGroupId — default to standard (no client-column SKUs).
+      articleGroupId: proposal.customer.articleGroupId ?? 'standard',
+    },
+  };
+}
+
+function recalcProposal(proposal: Proposal): Proposal {
+  const normalized = normalizeProposalCustomer(proposal);
+  const customerGroupId = normalized.customer.articleGroupId ?? 'standard';
+  return {
+    ...normalized,
+    options: normalized.options.map((opt, idx) => ({
       ...opt,
-      calculation: calculateOptionSync(opt, idx + 1),
+      calculation: calculateOptionSync(opt, idx + 1, { customerGroupId }),
     })),
     updatedAt: nowIso(),
   };

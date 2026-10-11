@@ -15,13 +15,14 @@ export const DEMO_SUPPLIER = {
   ogrn: '1117847053103',
   kpp: '784001001',
   signatoryName: 'Алексей Баранов',
+  // Exact wording from kp2705 / kp2699 body (hyphen, not em-dash).
   signatoryRole:
-    'Управляющий управляющей организации АО «Индид» — Индивидуальный предприниматель',
+    'Управляющий управляющей организации АО «Индид» - Индивидуальный предприниматель',
   supportPhone: '8 800 333-09-06',
   supportUrl: 'https://support.indeed-company.ru/',
   certificateNumber: '4667',
   sourceRefs: [
-    { sourceId: 'S04', locator: 'word/header1.xml; p17:p19' },
-    { sourceId: 'S05', locator: 'p11' },
+    { sourceId: 'KP2705', locator: 'word/header1.xml; signature block' },
+    { sourceId: 'KP2699', locator: 'word/header1.xml; signature block' },
   ],
 } satisfies DemoSupplierProfile;

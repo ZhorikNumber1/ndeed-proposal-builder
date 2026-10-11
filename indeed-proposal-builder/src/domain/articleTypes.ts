@@ -16,7 +16,31 @@ export type ArticleEntryKind =
 
 export type ArticleEntryQuality = 'confirmed' | 'needs_review' | 'ambiguous';
 
-export type CustomerGroupId = 'standard' | 'gazprom' | 'fstec';
+/** Official customer columns from articles registry (PAM C–T / AM·CM analogs). */
+export type CustomerGroupId =
+  | 'standard'
+  | 'gazprom'
+  | 'dzo_gpb'
+  | 'rosatom'
+  | 'rosneft'
+  | 'rosseti'
+  | 'rushydro'
+  | 'depir'
+  | 'aviation'
+  /** @deprecated Prefer configuration.certified; kept for draft compat */
+  | 'fstec';
+
+export const CUSTOMER_GROUP_OPTIONS: ReadonlyArray<{ id: CustomerGroupId; label: string }> = [
+  { id: 'standard', label: 'Основные' },
+  { id: 'gazprom', label: 'Газпром' },
+  { id: 'dzo_gpb', label: 'ДЗО ГПБ' },
+  { id: 'rosatom', label: 'Росатом' },
+  { id: 'rosneft', label: 'Роснефть' },
+  { id: 'rosseti', label: 'Россети' },
+  { id: 'rushydro', label: 'РусГидро' },
+  { id: 'depir', label: 'ДЭПиР' },
+  { id: 'aviation', label: 'Авиационная группа' },
+];
 
 export type ArticleSeedKind = 'control_sample';
 

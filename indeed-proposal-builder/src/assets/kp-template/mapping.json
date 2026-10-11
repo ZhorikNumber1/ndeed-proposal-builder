@@ -1,0 +1,73 @@
+{
+  "source": {
+    "extractedFrom": [
+      {
+        "file": "kp2705-Oilgaztet-pam10cs-TT-sep2026.docx",
+        "sha256": "c8a93b068a88970f20cb1859a2a237a318ccafbaefa80aae31d57b17fc7c539b",
+        "role": "PAM CS reference (two price tables: annual + perpetual)"
+      },
+      {
+        "file": "kp2699-KSK-IT-pam60-MN-sep2026.docx",
+        "sha256": "c9a42b8a5e370ce1b0aba913292b66c6b453fa2ee54e60f79db542d0e3f61f04",
+        "role": "PAM UL reference (one annual price table)"
+      }
+    ],
+    "mediaByteIdenticalAcrossBothDocx": true,
+    "copiedFromPackagePath": "word/media/",
+    "note": "Binaries are byte-identical originals; not regenerated."
+  },
+  "assets": [
+    {
+      "canonicalName": "logo.png",
+      "originalName": "image1.png",
+      "role": "logo",
+      "placement": "header (left, floating behindDoc)",
+      "sha256": "263b648733ef67dd729e8b0f2ee97f2be19d4e63161b7bc219f2da558e5e6ae3",
+      "bytes": 8407,
+      "widthPx": 823,
+      "heightPx": 167,
+      "colorType": "RGBA",
+      "displayExtentEmu": { "cx": 1514475, "cy": 307628 },
+      "displayApproxPt": { "w": 119.25, "h": 24.22 }
+    },
+    {
+      "canonicalName": "red-line.png",
+      "originalName": "image2.png",
+      "role": "red-line",
+      "placement": "header (under requisites)",
+      "sha256": "8b13a5ce530633a60223bbca61198cdbbc03c14e7bf09fe5a297df668ca6c86c",
+      "bytes": 139,
+      "widthPx": 2048,
+      "heightPx": 5,
+      "colorType": "RGBA",
+      "displayExtentEmu": { "cx": 6096960, "cy": 12700 },
+      "displayApproxPt": { "w": 480.08, "h": 1.0 }
+    },
+    {
+      "canonicalName": "signature.png",
+      "originalName": "image3.png",
+      "role": "signature",
+      "placement": "body signatory block (left of / near title)",
+      "sha256": "3d9b24a844aed72cdc3a2d8b34be9b798abf1f711047ab0bd773fe3f16bf72c0",
+      "bytes": 4733,
+      "widthPx": 327,
+      "heightPx": 126,
+      "colorType": "RGBA",
+      "displayExtentEmu": { "cx": 1516284, "cy": 652756 },
+      "displayApproxIn": { "w": 1.66, "h": 0.71 }
+    },
+    {
+      "canonicalName": "stamp.png",
+      "originalName": "image4.png",
+      "role": "stamp",
+      "placement": "body signatory block (near name Алексей Баранов)",
+      "sha256": "cde001557da885b1f9837fff5f14f1cb7944cc68b79d9d1af0607048ac75df7f",
+      "bytes": 41020,
+      "widthPx": 497,
+      "heightPx": 497,
+      "colorType": "RGB",
+      "displayExtentEmu": { "cx": 1304925, "cy": 1263600 },
+      "displayApproxIn": { "w": 1.43, "h": 1.38 }
+    }
+  ]
+}

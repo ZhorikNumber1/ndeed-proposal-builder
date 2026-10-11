@@ -1,9 +1,11 @@
 import { useBuilder, validityLabel } from '../../app/BuilderProvider';
+import { CUSTOMER_GROUP_OPTIONS, type CustomerGroupId } from '../../domain/articleTypes';
 import type { Validity } from '../../domain/types';
 
 export function StepDetails() {
   const { state, dispatch } = useBuilder();
   const p = state.proposal;
+  const articleGroupId: CustomerGroupId = p.customer.articleGroupId ?? 'standard';
 
   const validityKind = p.validity.kind;
   const validityValue =
@@ -63,6 +65,28 @@ export function StepDetails() {
             onChange={(e) => dispatch({ type: 'UPDATE_META', patch: { customerName: e.target.value } })}
           />
           {missing.customer ? <div className="field-error">Укажите наименование заказчика</div> : null}
+        </div>
+        <div className="field">
+          <label htmlFor="kp-article-group">Категория заказчика (артикулы)</label>
+          <select
+            id="kp-article-group"
+            value={articleGroupId}
+            onChange={(e) =>
+              dispatch({
+                type: 'UPDATE_META',
+                patch: { articleGroupId: e.target.value as CustomerGroupId },
+              })
+            }
+          >
+            {CUSTOMER_GROUP_OPTIONS.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.label}
+              </option>
+            ))}
+          </select>
+          <div className="demo-calc-label">
+            Выбирается явно из реестра артикулов; не выводится из названия компании. Влияет на SKU.
+          </div>
         </div>
         <div className="field">
           <label htmlFor="kp-manager">Менеджер (метаданные)</label>

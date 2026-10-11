@@ -62,17 +62,31 @@ function resolveVars(
 
 function optionItemIds(option: ProposalOption): Set<string> {
   const ids = new Set<string>();
-  const calc = option.calculation;
-  if (calc) {
-    for (const line of calc.items) ids.add(line.itemId);
-  }
+  const moduleIds = new Set<string>();
   for (const c of option.configurations.filter((x) => x.enabled)) {
     if (c.product === 'PAM' && c.kitQuantity > 0) ids.add('PAM.FSTEC_KIT');
     if (c.product === 'PAM' && c.metric === 'users') ids.add('PAM.UL');
     if (c.product === 'PAM' && c.metric === 'concurrent_sessions') ids.add('PAM.CS');
-    for (const m of c.modules) ids.add(m.itemId);
+    for (const m of c.modules) {
+      moduleIds.add(m.itemId);
+      ids.add(m.itemId);
+    }
     if (c.product === 'AM') ids.add('AM.BASE');
     if (c.product === 'CM' && c.platform === 'windows') ids.add('CM.WINDOWS.BASE');
+  }
+  const calc = option.calculation;
+  if (calc) {
+    for (const line of calc.items) {
+      // WL priced as LL must not pull the Linux Logon description unless LL was selected.
+      if (
+        line.itemId === 'AM.LINUX_LOGON' &&
+        moduleIds.has('AM.WINDOWS_LOGON') &&
+        !moduleIds.has('AM.LINUX_LOGON')
+      ) {
+        continue;
+      }
+      ids.add(line.itemId);
+    }
   }
   return ids;
 }
@@ -147,7 +161,7 @@ export function buildProposalDocument(proposal: Proposal): ProposalDocument {
 
   docBlocks.push({
     type: 'meta',
-    left: `Исх. ${proposal.number || '—'}`,
+    left: `Исх. №${proposal.number || '—'}`,
     center: `от ${formatDateRuLong(proposal.issueDate)}`,
     right: proposal.customer.legalName || '—',
   });
@@ -230,24 +244,25 @@ export function buildProposalDocument(proposal: Proposal): ProposalDocument {
       allUnresolvedVars.push(...unresolved);
       tableTitle = text;
     }
+    // Title once as heading; do not also set table.title (docxExporter would duplicate it).
     docBlocks.push({ type: 'heading', level: 2, text: tableTitle });
 
     const lines = option.calculation?.items ?? [];
     const tbl = tableRows(lines);
-    tbl.title = tableTitle;
     tbl.optionId = option.id;
 
     // Total row
     const amount = option.calculation?.totals.amount;
     const known = option.calculation?.totals.knownSubtotal;
+    // KP layout (kp2705/kp2699): «Итого» in column 4, amount in column 6.
     if (option.calculation?.status === 'complete' && amount != null) {
       tbl.rows.push({
-        cells: ['', '', '', '', 'Итого', formatMoneyPlain(amount)],
+        cells: ['', '', '', 'Итого', '', formatMoneyPlain(amount)],
         isTotal: true,
       });
     } else if (known != null) {
       tbl.rows.push({
-        cells: ['', '', '', '', 'Частичная сумма (известные строки)', formatMoneyPlain(known)],
+        cells: ['', '', '', 'Частичная сумма', '', formatMoneyPlain(known)],
         isTotal: true,
       });
       unresolvedNotes.push(`Альтернатива «${option.label}»: итог неполный — есть строки без цены`);

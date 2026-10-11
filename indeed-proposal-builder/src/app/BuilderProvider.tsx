@@ -29,11 +29,16 @@ import type { Proposal } from '../domain/types';
 
 /** Build export document from a synchronous snapshot — never from a stale React closure after dispatch. */
 function proposalForExport(proposal: Proposal, revision: number): Proposal {
+  const customerGroupId = proposal.customer.articleGroupId ?? 'standard';
   return {
     ...proposal,
+    customer: {
+      legalName: proposal.customer.legalName,
+      articleGroupId: customerGroupId,
+    },
     options: proposal.options.map((option) => ({
       ...option,
-      calculation: calculateOptionSync(option, revision),
+      calculation: calculateOptionSync(option, revision, { customerGroupId }),
     })),
     updatedAt: new Date().toISOString(),
   };

@@ -4,8 +4,22 @@
 
 ## Запуск
 
+Нужен **Node.js 20 LTS или новее** (Vite 8 / Rolldown). Node 19 не подходит (`styleText` отсутствует в `node:util`).
+
+Проверка: `node -v` → должно быть `v20.x` / `v22.x` / выше.
+
+Через nvm (macOS):
+
+```bash
+nvm install 22
+nvm use 22
+```
+
+Затем:
+
 ```bash
 cd indeed-proposal-builder
+rm -rf node_modules
 npm install
 npm run dev
 ```

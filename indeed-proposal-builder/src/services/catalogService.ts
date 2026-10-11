@@ -1,17 +1,14 @@
-import observedSkus from '../data/observedSkus.json';
 import calculatorMapping from '../data/calculatorMapping.json';
 import { PRODUCT_DEFINITIONS } from '../data/products';
 import type {
   CatalogItem,
   CatalogService,
-  ObservedSku,
   ProductDefinition,
   SkuLookup,
   SkuResolution,
 } from '../domain/types';
 import { resolveArticle } from './articleResolver';
 
-const skus = observedSkus as ObservedSku[];
 const items = calculatorMapping.items as CatalogItem[];
 
 export function resolveSkuSync(input: SkuLookup): SkuResolution {
@@ -21,7 +18,7 @@ export function resolveSkuSync(input: SkuLookup): SkuResolution {
     termMonths: input.termMonths,
     packageCapacity: input.packageCapacity,
     certification: input.certified,
-    customerGroupId: 'standard',
+    customerGroupId: input.customerGroupId ?? 'standard',
   });
 
   if (articleResult.status === 'found' && articleResult.sku) {
@@ -40,34 +37,14 @@ export function resolveSkuSync(input: SkuLookup): SkuResolution {
     };
   }
 
-  const matches = skus.filter((s) => {
-    if (s.itemId !== input.itemId) return false;
-    if (s.licenseType !== input.licenseType && s.licenseType !== 'not_applicable') return false;
-    if (s.termMonths !== input.termMonths) return false;
-    if (s.packageCapacity != null || input.packageCapacity != null) {
-      if (s.packageCapacity !== input.packageCapacity) return false;
-    }
-    if (input.certified === true) {
-      if (s.certifiedEvidence !== true) return false;
-    } else if (input.certified === false || input.certified === null) {
-      if (s.certifiedEvidence === true) return false;
-    }
-    return true;
-  });
-
-  if (matches.length === 1 && matches[0].sku) {
-    return {
-      sku: matches[0].sku,
-      status: 'observed_exact',
-      labelExample: matches[0].labelExample,
-    };
-  }
-
+  // articleResolver already consulted observed fixtures with catalog eligibility rules.
+  // Do not re-apply raw observedSkus here — that would resurrect special/missing codes
+  // (e.g. PAM-02120010 / PAM-02000010) after a deliberate not_found.
   const cat = items.find((i) => i.itemId === input.itemId);
   return {
     sku: null,
     status: 'unresolved',
-    labelExample: cat?.sourceLabel,
+    labelExample: articleResult.issues[0] ?? cat?.sourceLabel,
   };
 }
 
