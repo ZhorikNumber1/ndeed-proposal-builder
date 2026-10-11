@@ -54,17 +54,15 @@ function matchesObservedCertification(obs: ObservedSku, certification: boolean |
 
 function matchesCustomerGroup(entry: ArticleEntry, customerGroupId?: CustomerGroupId): boolean {
   if (customerGroupId == null || customerGroupId === 'standard') {
-    // Default / standard resolution must not pick specialized client columns
-    // that were imported with customerGroupId=standard (Росатом, Россети, …).
+    // Default must not pick specialized client columns (Газпром, Росатом, …).
     if (entry.kind === 'customer_variant') return false;
     return entry.customerGroupId === 'standard';
   }
-  if (customerGroupId === 'gazprom') {
-    return entry.customerGroupId === 'gazprom';
-  }
+  // Legacy draft value: treat as standard + FSTEC certification filter elsewhere.
   if (customerGroupId === 'fstec') {
     return entry.certification === 'fstec' && entry.customerGroupId === 'standard';
   }
+  // Explicit client column — never fall back to «Основные».
   return entry.customerGroupId === customerGroupId;
 }
 
@@ -115,15 +113,43 @@ function resolveFromObserved(input: ArticleResolveInput): ArticleResolution | nu
   });
 
   if (matches.length === 1 && matches[0].sku) {
+    const sku = matches[0].sku;
+    // When the official registry is loaded, observed KP fixtures may auto-resolve
+    // only if the SKU exists as a non-special, non-excluded registry row.
+    // Specials (e.g. PAM-02000010 @ разовыеуникальные B63) must never auto-apply.
+    if (catalog.importStatus === 'ok' && catalog.entries.length > 0) {
+      const eligible = catalog.entries.some(
+        (e) =>
+          e.sku === sku &&
+          !e.excludedByDefault &&
+          !AUTO_EXCLUDED_KINDS.has(e.kind) &&
+          e.kind !== 'customer_variant',
+      );
+      if (!eligible) {
+        const present = catalog.entries.some((e) => e.sku === sku);
+        return {
+          status: 'not_found',
+          sku: null,
+          provenance: null,
+          skuStatus: 'unresolved',
+          entryId: null,
+          issues: [
+            present
+              ? `Observed SKU ${sku} exists only as special/excluded registry row — not used for automatic match`
+              : `Observed SKU ${sku} is not present in the official articles registry (catalog import)`,
+          ],
+        };
+      }
+    }
     return {
       status: 'found',
-      sku: matches[0].sku,
+      sku,
       provenance: 'observed',
       skuStatus: 'observed_exact',
       entryId: null,
       issues: [],
       display: {
-        sku: matches[0].sku,
+        sku,
         name: matches[0].labelExample,
       },
     };

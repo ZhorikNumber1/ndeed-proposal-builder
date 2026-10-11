@@ -122,24 +122,26 @@ function blockToContent(block: DocumentBlock): Content[] {
             text: String(c),
             fontSize: 7,
             bold: Boolean(r.isTotal),
-            alignment: (idx === 2 ? 'left' : 'center') as 'left' | 'center',
+            alignment: (idx >= 3 || idx === 0 ? 'center' : 'left') as 'left' | 'center',
           })),
         ),
       ];
-      const nodes: Content[] = [
-        {
-          table: {
-            headerRows: 1,
-            widths: [22, 70, '*', 40, 55, 55],
-            body,
-          },
-          layout: {
-            hLineWidth: () => 0.5,
-            vLineWidth: () => 0.5,
-          },
-          margin: [0, 0, 0, 6],
+      const nodes: Content[] = [];
+      if (block.title) {
+        nodes.push({ text: block.title, bold: true, fontSize: 9, margin: [0, 6, 0, 4] });
+      }
+      nodes.push({
+        table: {
+          headerRows: 1,
+          widths: [22, 70, '*', 40, 55, 55],
+          body,
         },
-      ];
+        layout: {
+          hLineWidth: () => 0.5,
+          vLineWidth: () => 0.5,
+        },
+        margin: [0, 0, 0, 6],
+      });
       if (block.footnote) {
         nodes.push({ text: block.footnote, fontSize: 7, bold: true, margin: [0, 0, 0, 10] });
       }
@@ -150,18 +152,86 @@ function blockToContent(block: DocumentBlock): Content[] {
   }
 }
 
+function uint8ToDataUrl(bytes: Uint8Array, mime = 'image/png'): string {
+  let binary = '';
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+  }
+  return `data:${mime};base64,${btoa(binary)}`;
+}
+
 export function createPdfExporter(): Pick<ExportService, 'toPdf'> {
   return {
     async toPdf(document: ProposalDocument): Promise<Blob> {
       const pdfMake = await getPdfMake();
+      const { loadKpTemplateImages, KP_IMAGE_SIZES } = await import('./kpTemplateAssets');
+      const images = await loadKpTemplateImages();
+      const supplier = document.blocks.find((b) => b.type === 'supplierHeader');
+      const supplierLines = supplier && supplier.type === 'supplierHeader' ? supplier.lines : [];
+
       const content: Content[] = [];
+      // Approximate corporate header (pdfmake cannot reuse Word header XML).
+      content.push({
+        columns: [
+          {
+            image: uint8ToDataUrl(images.logo),
+            width: KP_IMAGE_SIZES.logo.width,
+            height: KP_IMAGE_SIZES.logo.height,
+          },
+          {
+            width: '*',
+            stack: supplierLines.map((l, i) => ({
+              text: l,
+              alignment: 'right' as const,
+              bold: i === 0,
+              fontSize: 8,
+            })),
+          },
+        ],
+        margin: [0, 0, 0, 4],
+      });
+      content.push({
+        image: uint8ToDataUrl(images.redLine),
+        width: 515,
+        height: 1,
+        margin: [0, 0, 0, 10],
+      });
+
       for (const b of document.blocks) {
+        if (b.type === 'supplierHeader') continue; // already in header approximation
         content.push(...blockToContent(b));
+        if (b.type === 'signature') {
+          content.push({
+            text: document.isDemo
+              ? 'Демонстрационный черновик — подпись и печать для макета, документ не подписан'
+              : '',
+            color: '#e30613',
+            bold: true,
+            fontSize: 8,
+            margin: [0, 4, 0, 4],
+          });
+          content.push({
+            columns: [
+              {
+                image: uint8ToDataUrl(images.signature),
+                width: KP_IMAGE_SIZES.signature.width * 0.75,
+                height: KP_IMAGE_SIZES.signature.height * 0.75,
+              },
+              {
+                image: uint8ToDataUrl(images.stamp),
+                width: KP_IMAGE_SIZES.stamp.width * 0.75,
+                height: KP_IMAGE_SIZES.stamp.height * 0.75,
+                alignment: 'right',
+              },
+            ],
+            margin: [0, 4, 0, 8],
+          });
+        }
       }
       if (document.unresolvedNotes.length) {
         content.push({ text: 'Незавершённые данные', bold: true, fontSize: 10, margin: [0, 12, 0, 4] });
         content.push({
-          // Copy notes — pdfmake mutates ul entries in place during layout.
           ul: document.unresolvedNotes.map((n) => String(n)),
           fontSize: 8,
         });
@@ -177,7 +247,8 @@ export function createPdfExporter(): Pick<ExportService, 'toPdf'> {
           fontSize: 9,
         },
         content,
-        pageMargins: [40, 40, 40, 40],
+        // A4-ish; not byte-identical to Word — see PRICING_SKU_KP_AUDIT.md
+        pageMargins: [40, 48, 40, 40],
       };
 
       const blob = await pdfMake.createPdf(docDefinition).getBlob();

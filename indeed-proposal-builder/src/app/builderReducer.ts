@@ -6,9 +6,14 @@ import type {
   ProposalOption,
   Validity,
 } from '../domain/types';
+import type { CustomerGroupId } from '../domain/articleTypes';
 import { calculateOptionSync } from '../domain/calculateOption';
 import { createDemoProposal, createEmptyProposal, duplicateConfiguration, newConfiguration, cloneConfigurations, defaultCommercialTerms } from '../data/demoProposal';
 import { candidateToConfiguration } from '../domain/normalizeRequest';
+
+function articleGroupOf(proposal: Proposal): CustomerGroupId {
+  return proposal.customer.articleGroupId ?? 'standard';
+}
 
 export interface BuilderState {
   proposal: Proposal;
@@ -27,6 +32,7 @@ export type BuilderAction =
   | { type: 'SET_ACTIVE_OPTION'; optionId: string }
   | { type: 'UPDATE_META'; patch: Partial<Pick<Proposal, 'number' | 'issueDate' | 'rawRequest'>> & {
       customerName?: string;
+      articleGroupId?: CustomerGroupId;
       managerName?: string;
       validity?: Validity;
     } }
@@ -52,17 +58,22 @@ export type BuilderAction =
   | { type: 'SET_DRAFT_PROMPT'; show: boolean }
   | { type: 'MARK_CLEAN' };
 
-function recalcOption(option: ProposalOption, revision: number): ProposalOption {
+function recalcOption(
+  option: ProposalOption,
+  revision: number,
+  customerGroupId: CustomerGroupId = 'standard',
+): ProposalOption {
   return {
     ...option,
-    calculation: calculateOptionSync(option, revision),
+    calculation: calculateOptionSync(option, revision, { customerGroupId }),
   };
 }
 
 function recalcAll(proposal: Proposal, revision: number): Proposal {
+  const customerGroupId = articleGroupOf(proposal);
   return {
     ...proposal,
-    options: proposal.options.map((o) => recalcOption(o, revision)),
+    options: proposal.options.map((o) => recalcOption(o, revision, customerGroupId)),
     updatedAt: new Date().toISOString(),
   };
 }
@@ -150,13 +161,19 @@ export function builderReducer(state: BuilderState, action: BuilderAction): Buil
     case 'SET_ACTIVE_OPTION':
       return { ...state, ui: { ...state.ui, activeOptionId: action.optionId } };
     case 'UPDATE_META': {
-      const proposal: Proposal = {
+      const articleGroupId =
+        action.patch.articleGroupId ?? state.proposal.customer.articleGroupId ?? 'standard';
+      const groupChanged =
+        action.patch.articleGroupId != null &&
+        action.patch.articleGroupId !== (state.proposal.customer.articleGroupId ?? 'standard');
+      let proposal: Proposal = {
         ...state.proposal,
         number: action.patch.number ?? state.proposal.number,
         issueDate: action.patch.issueDate ?? state.proposal.issueDate,
         rawRequest: action.patch.rawRequest ?? state.proposal.rawRequest,
         customer: {
           legalName: action.patch.customerName ?? state.proposal.customer.legalName,
+          articleGroupId,
         },
         manager: {
           displayName: action.patch.managerName ?? state.proposal.manager.displayName,
@@ -164,6 +181,11 @@ export function builderReducer(state: BuilderState, action: BuilderAction): Buil
         validity: action.patch.validity ?? state.proposal.validity,
         updatedAt: new Date().toISOString(),
       };
+      if (groupChanged) {
+        const revision = state.revision + 1;
+        proposal = recalcAll(proposal, revision);
+        return { ...state, proposal, revision, ui: { ...state.ui, dirty: true } };
+      }
       return { ...state, proposal, ui: { ...state.ui, dirty: true } };
     }
     case 'SET_RAW_REQUEST':

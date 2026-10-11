@@ -46,20 +46,20 @@ const PAM_COLUMN_MAP: Array<{
   { col: 3, role: 'standard_fstec', certification: 'fstec', customerGroupId: 'standard', rawLabel: 'Основные ФСТЭК' },
   { col: 4, role: 'gazprom', certification: 'ordinary', customerGroupId: 'gazprom', rawLabel: 'Газпром' },
   { col: 5, role: 'gazprom_fstec', certification: 'fstec', customerGroupId: 'gazprom', rawLabel: 'Газпром ФСТЭК' },
-  { col: 6, role: 'dzo_gpb', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'ДЗО ГПБ' },
-  { col: 7, role: 'dzo_gpb_fstec', certification: 'fstec', customerGroupId: 'standard', rawLabel: 'ДЗО ГПБ ФСТЭК' },
-  { col: 8, role: 'rosatom', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'Росатом' },
-  { col: 9, role: 'rosatom_fstec', certification: 'fstec', customerGroupId: 'standard', rawLabel: 'Росатом ФСТЭК' },
-  { col: 10, role: 'rosneft', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'Роснефть' },
-  { col: 11, role: 'rosneft_fstec', certification: 'fstec', customerGroupId: 'standard', rawLabel: 'Роснефть ФСТЭК' },
-  { col: 12, role: 'rosseti', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'Россети' },
-  { col: 13, role: 'rosseti_fstec', certification: 'fstec', customerGroupId: 'standard', rawLabel: 'Россети ФСТЭК' },
-  { col: 14, role: 'rushydro', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'РусГидро' },
-  { col: 15, role: 'rushydro_fstec', certification: 'fstec', customerGroupId: 'standard', rawLabel: 'РусГидро ФСТЭК' },
-  { col: 16, role: 'depir', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'ДЭПиР' },
-  { col: 17, role: 'depir_fstec', certification: 'fstec', customerGroupId: 'standard', rawLabel: 'ДЭПиР ФСТЭК' },
-  { col: 18, role: 'aviation', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'Авиационная группа' },
-  { col: 19, role: 'aviation_fstec', certification: 'fstec', customerGroupId: 'standard', rawLabel: 'Авиационная группа ФСТЭК' },
+  { col: 6, role: 'dzo_gpb', certification: 'ordinary', customerGroupId: 'dzo_gpb', rawLabel: 'ДЗО ГПБ' },
+  { col: 7, role: 'dzo_gpb_fstec', certification: 'fstec', customerGroupId: 'dzo_gpb', rawLabel: 'ДЗО ГПБ ФСТЭК' },
+  { col: 8, role: 'rosatom', certification: 'ordinary', customerGroupId: 'rosatom', rawLabel: 'Росатом' },
+  { col: 9, role: 'rosatom_fstec', certification: 'fstec', customerGroupId: 'rosatom', rawLabel: 'Росатом ФСТЭК' },
+  { col: 10, role: 'rosneft', certification: 'ordinary', customerGroupId: 'rosneft', rawLabel: 'Роснефть' },
+  { col: 11, role: 'rosneft_fstec', certification: 'fstec', customerGroupId: 'rosneft', rawLabel: 'Роснефть ФСТЭК' },
+  { col: 12, role: 'rosseti', certification: 'ordinary', customerGroupId: 'rosseti', rawLabel: 'Россети' },
+  { col: 13, role: 'rosseti_fstec', certification: 'fstec', customerGroupId: 'rosseti', rawLabel: 'Россети ФСТЭК' },
+  { col: 14, role: 'rushydro', certification: 'ordinary', customerGroupId: 'rushydro', rawLabel: 'РусГидро' },
+  { col: 15, role: 'rushydro_fstec', certification: 'fstec', customerGroupId: 'rushydro', rawLabel: 'РусГидро ФСТЭК' },
+  { col: 16, role: 'depir', certification: 'ordinary', customerGroupId: 'depir', rawLabel: 'ДЭПиР' },
+  { col: 17, role: 'depir_fstec', certification: 'fstec', customerGroupId: 'depir', rawLabel: 'ДЭПиР ФСТЭК' },
+  { col: 18, role: 'aviation', certification: 'ordinary', customerGroupId: 'aviation', rawLabel: 'Авиационная группа' },
+  { col: 19, role: 'aviation_fstec', certification: 'fstec', customerGroupId: 'aviation', rawLabel: 'Авиационная группа ФСТЭК' },
 ];
 
 const AM_CM_COLUMNS: Array<{
@@ -71,16 +71,20 @@ const AM_CM_COLUMNS: Array<{
 }> = [
   { col: 2, role: 'standard', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'Основные' },
   { col: 3, role: 'gazprom', certification: 'ordinary', customerGroupId: 'gazprom', rawLabel: 'Газпром' },
-  { col: 4, role: 'dzo_gpb', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'ДЗО ГПБ' },
-  { col: 5, role: 'rosatom', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'Росатом' },
-  { col: 6, role: 'rushydro', certification: 'ordinary', customerGroupId: 'standard', rawLabel: 'РусГидро' },
+  { col: 4, role: 'dzo_gpb', certification: 'ordinary', customerGroupId: 'dzo_gpb', rawLabel: 'ДЗО ГПБ' },
+  { col: 5, role: 'rosatom', certification: 'ordinary', customerGroupId: 'rosatom', rawLabel: 'Росатом' },
+  { col: 6, role: 'rushydro', certification: 'ordinary', customerGroupId: 'rushydro', rawLabel: 'РусГидро' },
 ];
 
 function findExcel(): string | null {
+  const preferredLocal = join(ROOT, '.local/inputs/артикулы_09.04.2026 копия.xlsx');
+  if (existsSync(preferredLocal)) return preferredLocal;
+
   const preferred = join(ROOT, 'reference/артикулы_09.04.2026 копия.xlsx');
   if (existsSync(preferred)) return preferred;
 
   const dirs = [
+    join(ROOT, '.local/inputs'),
     join(WORKSPACE, 'uploads'),
     join('/home/ubuntu/.cursor/projects/workspace/uploads'),
     join(ROOT, 'uploads'),
@@ -176,13 +180,22 @@ function isSkuCandidate(text: string): boolean {
   return /[A-Za-zА-Яа-я]/.test(text);
 }
 
-function inferPackageCapacity(name: string | null): number | null {
-  if (!name) return null;
-  const m =
-    name.match(/пакет\s*на\s*[-–—]?\s*(\d+)\s*пользовател/i) ||
-    name.match(/на\s+(\d+)\s*пользовател/i) ||
-    name.match(/(\d+)\s*пользовател/i);
-  return m ? Number(m[1]) : null;
+function inferPackageCapacity(name: string | null, sku?: string | null): number | null {
+  if (name) {
+    const m =
+      name.match(/одновременн(?:ые|ых)?\s+подключения\s*[-–—]?\s*(\d+)/i) ||
+      name.match(/пакет\s*на\s+одновременн[^\d]*(\d+)/i) ||
+      name.match(/пакет\s*на\s*[-–—]?\s*(\d+)\s*пользовател/i) ||
+      name.match(/на\s+(\d+)\s*пользовател/i) ||
+      name.match(/(\d+)\s*пользовател/i);
+    if (m) return Number(m[1]);
+  }
+  // PAM/PF standard codes: PAM-0{1=UL|2=CS}{12|00}{capacity}
+  if (sku) {
+    const sm = sku.trim().match(/^P(?:AM|F)-0([12])(12|00)(\d+)$/i);
+    if (sm) return Number(sm[3]);
+  }
+  return null;
 }
 
 function inferMetric(name: string | null, group: string | null): Metric | null {
@@ -309,7 +322,7 @@ function makeEntry(params: {
 }): ArticleEntry {
   const { licenseType, termMonths } = inferLicense(params.name, params.group);
   const metric = inferMetric(params.name, params.group);
-  const packageCapacity = inferPackageCapacity(params.name);
+  const packageCapacity = inferPackageCapacity(params.name, params.sku);
   const kind =
     params.kindOverride ??
     (params.customerGroupId !== 'standard' && params.columnRole !== 'standard' && params.columnRole !== 'standard_fstec'
@@ -404,8 +417,7 @@ function importPam(sheetName: string, sheet: XLSX.WorkSheet): ArticleEntry[] {
     for (const col of PAM_COLUMN_MAP) {
       const sku = cellText(sheet, r, col.col);
       if (!sku || !isSkuCandidate(sku)) continue;
-      const customerGroupId: CustomerGroupId =
-        col.customerGroupId === 'gazprom' ? 'gazprom' : 'standard';
+      const customerGroupId: CustomerGroupId = col.customerGroupId;
       const issues: string[] = [];
       let quality: ArticleEntryQuality = 'confirmed';
       if (ambiguousHorizontal) {
@@ -538,39 +550,69 @@ function importImplementation(sheetName: string, sheet: XLSX.WorkSheet): Article
   return entries;
 }
 
+function productFromSpecialSku(sku: string, desc: string | null): ProductCode | null {
+  // Anchored prefixes only — avoid "/Access Manager/" matching "Privileged Access Manager".
+  if (/^(PAM|PF|Gpam|Ipam|IPAF|PPM|PIM|PMP)-/i.test(sku) || /Privileged Access Manager/i.test(desc ?? '')) {
+    return 'PAM';
+  }
+  if (/^(CM|АCM|ACM|GCM)-/i.test(sku) || /Credential Manager|Certificate Manager/i.test(desc ?? '')) {
+    return 'CM';
+  }
+  if (/^(AM|GAM|АM)-/i.test(sku) || (/\bAccess Manager\b/i.test(desc ?? '') && !/Privileged/i.test(desc ?? ''))) {
+    return 'AM';
+  }
+  if (/^ITDR/i.test(sku)) return 'ITDR';
+  return null;
+}
+
 function importOneOff(sheetName: string, sheet: XLSX.WorkSheet): ArticleEntry[] {
   const entries: ArticleEntry[] = [];
   const range = sheetRange(sheet);
   if (!range) return entries;
   for (let r = range.r0; r <= range.r1; r++) {
-    const main = cellText(sheet, r, 1);
-    const special = cellText(sheet, r, 2);
+    const main = cellText(sheet, r, 1); // column B — primary special SKU (confirmed: B58/B63)
+    const paired = cellText(sheet, r, 2); // column C — paired/alt code, never auto-selected
     const desc = cellText(sheet, r, 3) ?? cellText(sheet, r, 0);
-    const sku = special ?? main;
-    if (!sku || !isSkuCandidate(sku)) continue;
-    let product: ProductCode | null = null;
-    if (/^AM|GAM|АM/i.test(sku) || /Access Manager/i.test(desc ?? '')) product = 'AM';
-    else if (/^CM|АCM|ACM/i.test(sku) || /Credential|Certificate Manager/i.test(desc ?? '')) product = 'CM';
-    else if (/^PAM|PF|Gpam/i.test(sku) || /Privileged Access/i.test(desc ?? '')) product = 'PAM';
-    else if (/^ITDR/i.test(sku)) product = 'ITDR';
-    entries.push(
-      makeEntry({
-        sheet: sheetName,
-        row0: r,
-        col0: special ? 2 : 1,
-        sku,
-        name: desc,
-        group: 'разовыеуникальные артикулы',
-        product,
-        certification: null,
-        customerGroupId: 'standard',
-        columnRole: special ? 'special' : 'main',
-        kindOverride: 'one_off',
-        quality: 'needs_review',
-        issues: main && special && main !== special ? [`paired_main:${main}`] : [],
-        excludedByDefault: true,
-      }),
-    );
+
+    const candidates: Array<{ sku: string; col0: number; role: string; issues: string[] }> = [];
+    if (main && isSkuCandidate(main)) {
+      candidates.push({
+        sku: main,
+        col0: 1,
+        role: 'special_main',
+        issues: paired && paired !== main ? [`paired_alt:${paired}`] : [],
+      });
+    }
+    if (paired && isSkuCandidate(paired) && paired !== main) {
+      candidates.push({
+        sku: paired,
+        col0: 2,
+        role: 'special_paired',
+        issues: main ? [`paired_main:${main}`] : [],
+      });
+    }
+
+    for (const cand of candidates) {
+      const product = productFromSpecialSku(cand.sku, desc);
+      entries.push(
+        makeEntry({
+          sheet: sheetName,
+          row0: r,
+          col0: cand.col0,
+          sku: cand.sku,
+          name: desc,
+          group: 'разовыеуникальные артикулы',
+          product,
+          certification: null,
+          customerGroupId: 'standard',
+          columnRole: cand.role,
+          kindOverride: 'one_off',
+          quality: 'needs_review',
+          issues: cand.issues,
+          excludedByDefault: true,
+        }),
+      );
+    }
   }
   return entries;
 }

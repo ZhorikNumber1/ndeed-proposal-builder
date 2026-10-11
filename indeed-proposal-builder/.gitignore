@@ -26,3 +26,8 @@ dist-ssr
 test-results/
 playwright-report/
 
+
+# Local confidential inputs (never commit)
+.local/
+reference/inputs/
+uploads/

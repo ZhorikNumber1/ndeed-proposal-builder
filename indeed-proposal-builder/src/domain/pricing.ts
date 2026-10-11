@@ -128,8 +128,10 @@ export const FSTEC_KIT = {
 export const CALCULATOR_PROVENANCE = {
   calculatorVersion: 'demo-extracted-S08',
   engineVersion: 'indeed-proposal-builder/1.0.0-demo',
-  sourceHash: 'd1fcd56cf9964d7d10de5fb251ad08354f93899f6f76a9cd7a1c512a94909435',
+  /** SHA-256 of `.local/inputs/price-calculator_NEW.xlsx` (ACTIVE: RUB ALL ПОДПИСКА / БЕССРОЧНАЯ). */
+  sourceHash: '59a5fdda805f2b558b2c8bfb24a446de0c36c72cee30008f239fb0e70d2e3ce3',
   sourceFile: 'price-calculator NEW.xlsx',
+  sourceSheets: ['RUB ALL ПОДПИСКА', 'RUB ALL БЕССРОЧНАЯ', 'Description'] as const,
 } as const;
 
 /**

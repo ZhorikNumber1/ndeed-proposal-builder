@@ -9,6 +9,7 @@ import type {
   Tax,
   ValidationIssue,
 } from './types';
+import type { CustomerGroupId } from './articleTypes';
 import { toMoney } from './money';
 import {
   AM_BASE_TIERS,
@@ -31,6 +32,13 @@ import {
   type Tier,
 } from './pricing';
 import { resolveSkuSync } from '../services/catalogService';
+
+export type CalculateOptionContext = {
+  customerGroupId?: CustomerGroupId;
+};
+
+/** Scoped for the current calculateOptionSync call; not exported. */
+let activeCustomerGroupId: CustomerGroupId = 'standard';
 
 const EXEMPT_TAX: Tax = {
   mode: 'exempt',
@@ -129,6 +137,7 @@ function buildLine(params: {
   licenseType: LicenseType | 'not_applicable';
   termMonths: number | null;
   certified: boolean | null;
+  customerGroupId?: CustomerGroupId;
 }): QuoteLine {
   const skuRes = resolveSkuSync({
     itemId: params.itemId,
@@ -136,6 +145,7 @@ function buildLine(params: {
     termMonths: params.termMonths,
     packageCapacity: params.packageCapacity,
     certified: params.certified,
+    customerGroupId: params.customerGroupId ?? activeCustomerGroupId,
   });
   return {
     id: params.id,
@@ -794,6 +804,20 @@ function priceConfiguration(
 }
 
 export function calculateOptionSync(
+  option: ProposalOption,
+  revision: number,
+  ctx?: CalculateOptionContext,
+): CalculationResult {
+  const prevGroup = activeCustomerGroupId;
+  activeCustomerGroupId = ctx?.customerGroupId ?? 'standard';
+  try {
+    return calculateOptionSyncInner(option, revision);
+  } finally {
+    activeCustomerGroupId = prevGroup;
+  }
+}
+
+function calculateOptionSyncInner(
   option: ProposalOption,
   revision: number,
 ): CalculationResult {

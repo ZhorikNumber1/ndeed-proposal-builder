@@ -128,7 +128,11 @@ export interface Proposal {
   /** YYYY-MM-DD */
   issueDate: string;
   rawRequest: string;
-  customer: { legalName: string };
+  customer: {
+    legalName: string;
+    /** Explicit articles-registry customer column; never inferred from company name. */
+    articleGroupId?: import('./articleTypes').CustomerGroupId;
+  };
   manager: { displayName: string };
   supplierProfileId: string;
   currency: 'RUB';
@@ -265,6 +269,7 @@ export interface SkuLookup {
   termMonths: number | null;
   packageCapacity: number | null;
   certified: boolean | null;
+  customerGroupId?: import('./articleTypes').CustomerGroupId;
 }
 
 export interface SkuResolution {

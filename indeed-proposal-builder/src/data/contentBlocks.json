@@ -368,8 +368,8 @@
     "variables": [],
     "sourceRefs": [
       {
-        "sourceId": "S04",
-        "locator": "p5"
+        "sourceId": "KP2699",
+        "locator": "PAM UL license paragraph"
       }
     ],
     "notes": null
@@ -389,8 +389,8 @@
     "variables": [],
     "sourceRefs": [
       {
-        "sourceId": "S06",
-        "locator": "p14"
+        "sourceId": "KP2705",
+        "locator": "PAM CS license paragraph"
       }
     ],
     "notes": null
@@ -950,20 +950,12 @@
     ],
     "sourceRefs": [
       {
-        "sourceId": "S04",
-        "locator": "p16"
+        "sourceId": "KP2705",
+        "locator": "body signature: С Уважением / Баранов"
       },
       {
-        "sourceId": "S04",
-        "locator": "p17"
-      },
-      {
-        "sourceId": "S04",
-        "locator": "p18"
-      },
-      {
-        "sourceId": "S04",
-        "locator": "p19"
+        "sourceId": "KP2699",
+        "locator": "body signature: С Уважением / Баранов"
       }
     ],
     "notes": "В корпусе два варианта должности; выбор хранится в профиле поставщика. Изображения подписи и печати отдельно от текста."
